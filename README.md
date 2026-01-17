@@ -2,6 +2,7 @@
 
 A QuickShell plugin for DankMaterialShell that provides real-time monitoring of AMD GPU statistics including usage, VRAM, temperature, power consumption, and per-process GPU utilization.
 
+
 ![Screenshot](screenshot.png)
 
 ## Features
