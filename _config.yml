@@ -1,0 +1,41 @@
+title: AMD GPU Monitor
+description: Real-time AMD GPU monitoring for DankMaterialShell
+theme: jekyll-theme-cayman
+baseurl: "/dms-amd-gpu-monitor"
+url: "https://navidagz.github.io"
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .git
+  - .gitignore
+  - AmdGpuMoniorWidget.qml
+  - plugin.json
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Installation
+    url: /docs/installation
+  - title: Configuration
+    url: /docs/configuration
+  - title: Troubleshooting
+    url: /docs/troubleshooting
+  - title: Technical Details
+    url: /docs/technical-details
