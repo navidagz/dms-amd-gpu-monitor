@@ -29,4 +29,16 @@ PluginSettings {
         description: "Prevent widget width from changing as values update"
         defaultValue: false
     }
+
+    SelectionSetting {
+        settingKey: "popoutStyle"
+        label: "Popout Style"
+        description: "Visual style for the popout panel"
+        options: [
+            { label: "Default", value: "default" },
+            { label: "Alternative", value: "alt" },
+            { label: "DMS (Coming Soon)", value: "dms" }
+        ]
+        defaultValue: "default"
+    }
 }
