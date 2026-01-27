@@ -37,7 +37,7 @@ PluginSettings {
         options: [
             { label: "Default", value: "default" },
             { label: "Alternative", value: "alt" },
-            { label: "DMS (Coming Soon)", value: "dms" }
+            { label: "DMS", value: "dms" }
         ]
         defaultValue: "default"
     }
