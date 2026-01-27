@@ -61,8 +61,6 @@ PluginComponent {
                 root.temperature = parseInt(amd_gpu.gpu_metrics.temperature_edge) || 0;
                 root.powerUsage = parseInt(amd_gpu.Sensors["Average Power"].value) || 0;
 
-                root.powerUsage = parseInt(amd_gpu.Sensors["Average Power"].value) || 0;
-
                 if (amd_gpu.fdinfo) {
                     const processList = [];
                     
@@ -233,22 +231,12 @@ PluginComponent {
                     }
                 }
 
-                Rectangle {
+                ProgressBar {
                     width: parent.width
-                    height: 12
-                    color: Theme.surfaceText
-                    radius: Theme.cornerRadius
-
-                    Rectangle {
-                        width: parent.width * (root.gpuUsage / 100)
-                        height: parent.height
-                        color: root.getUsageColor(root.gpuUsage)
-                        radius: Theme.cornerRadius
-
-                        Behavior on width {
-                            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                        }
-                    }
+                    barHeight: 12
+                    barRadius: Theme.cornerRadius
+                    value: root.gpuUsage
+                    barColor: root.getUsageColor(root.gpuUsage)
                 }
             }
 
@@ -275,22 +263,12 @@ PluginComponent {
                     }
                 }
 
-                Rectangle {
+                ProgressBar {
                     width: parent.width
-                    height: 12
-                    color: Theme.surfaceText
-                    radius: Theme.cornerRadius
-
-                    Rectangle {
-                        width: parent.width * (root.vramPercent / 100)
-                        height: parent.height
-                        color: root.getUsageColor(root.vramPercent)
-                        radius: Theme.cornerRadius
-
-                        Behavior on width {
-                            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                        }
-                    }
+                    barHeight: 12
+                    barRadius: Theme.cornerRadius
+                    value: root.vramPercent
+                    barColor: root.getUsageColor(root.vramPercent)
                 }
             }
 
@@ -499,120 +477,22 @@ PluginComponent {
                 width: parent.width
                 spacing: Theme.spacingM
 
-                // GPU Usage
-                Rectangle {
+                StatCard {
                     width: (parent.width - Theme.spacingM) / 2
-                    height: 100
-                    radius: 16
-                    color: Theme.surfaceContainerHigh
-
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: Theme.spacingM
-                        spacing: Theme.spacingS
-
-                        Row {
-                            spacing: Theme.spacingS
-
-                            DankIcon {
-                                name: "speed"
-                                size: 20
-                                color: Theme.primary
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            StyledText {
-                                text: "GPU"
-                                color: Theme.surfaceVariantText
-                                font.pixelSize: Theme.fontSizeSmall
-                                font.weight: Font.Medium
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        StyledText {
-                            text: `${root.gpuUsage.toFixed(0)}%`
-                            color: Theme.surfaceText
-                            font.pixelSize: 28
-                            font.weight: Font.Bold
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            height: 4
-                            radius: 2
-                            color: Theme.surfaceContainerHighest
-
-                            Rectangle {
-                                width: parent.width * (root.gpuUsage / 100)
-                                height: parent.height
-                                radius: 2
-                                color: root.getUsageColor(root.gpuUsage)
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                                }
-                            }
-                        }
-                    }
+                    iconName: "speed"
+                    iconColor: Theme.primary
+                    label: "GPU"
+                    valueText: `${root.gpuUsage.toFixed(0)}%`
+                    progressValue: root.gpuUsage
                 }
 
-                // VRAM Usage
-                Rectangle {
+                StatCard {
                     width: (parent.width - Theme.spacingM) / 2
-                    height: 100
-                    radius: 16
-                    color: Theme.surfaceContainerHigh
-
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: Theme.spacingM
-                        spacing: Theme.spacingS
-
-                        Row {
-                            spacing: Theme.spacingS
-
-                            DankIcon {
-                                name: "memory"
-                                size: 20
-                                color: Theme.secondary
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            StyledText {
-                                text: "VRAM"
-                                color: Theme.surfaceVariantText
-                                font.pixelSize: Theme.fontSizeSmall
-                                font.weight: Font.Medium
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        StyledText {
-                            text: `${(root.vramUsed / 1024).toFixed(1)} GiB`
-                            color: Theme.surfaceText
-                            font.pixelSize: 28
-                            font.weight: Font.Bold
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            height: 4
-                            radius: 2
-                            color: Theme.surfaceContainerHighest
-
-                            Rectangle {
-                                width: parent.width * (root.vramPercent / 100)
-                                height: parent.height
-                                radius: 2
-                                color: root.getUsageColor(root.vramPercent)
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                                }
-                            }
-                        }
-                    }
+                    iconName: "memory"
+                    iconColor: Theme.secondary
+                    label: "VRAM"
+                    valueText: `${(root.vramUsed / 1024).toFixed(1)} GiB`
+                    progressValue: root.vramPercent
                 }
             }
 
@@ -703,130 +583,25 @@ PluginComponent {
                         font.weight: Font.Medium
                     }
 
-                    // GFX bar
-                    Row {
+                    EngineBar {
                         width: parent.width
-                        spacing: Theme.spacingS
-
-                        StyledText {
-                            width: 50
-                            text: "GFX"
-                            color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Rectangle {
-                            width: parent.width - 100
-                            height: 8
-                            radius: 4
-                            color: Theme.surfaceContainerHighest
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Rectangle {
-                                width: parent.width * (root.gfxUsage / 100)
-                                height: parent.height
-                                radius: 4
-                                color: Theme.primary
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                                }
-                            }
-                        }
-
-                        StyledText {
-                            width: 40
-                            text: `${root.gfxUsage.toFixed(0)}%`
-                            color: Theme.surfaceVariantText
-                            font.pixelSize: Theme.fontSizeSmall
-                            horizontalAlignment: Text.AlignRight
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
+                        label: "GFX"
+                        value: root.gfxUsage
+                        barColor: Theme.primary
                     }
 
-                    // MEM bar
-                    Row {
+                    EngineBar {
                         width: parent.width
-                        spacing: Theme.spacingS
-
-                        StyledText {
-                            width: 50
-                            text: "MEM"
-                            color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Rectangle {
-                            width: parent.width - 100
-                            height: 8
-                            radius: 4
-                            color: Theme.surfaceContainerHighest
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Rectangle {
-                                width: parent.width * (root.memUsage / 100)
-                                height: parent.height
-                                radius: 4
-                                color: Theme.secondary
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                                }
-                            }
-                        }
-
-                        StyledText {
-                            width: 40
-                            text: `${root.memUsage.toFixed(0)}%`
-                            color: Theme.surfaceVariantText
-                            font.pixelSize: Theme.fontSizeSmall
-                            horizontalAlignment: Text.AlignRight
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
+                        label: "MEM"
+                        value: root.memUsage
+                        barColor: Theme.secondary
                     }
 
-                    // Media bar
-                    Row {
+                    EngineBar {
                         width: parent.width
-                        spacing: Theme.spacingS
-
-                        StyledText {
-                            width: 50
-                            text: "Media"
-                            color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Rectangle {
-                            width: parent.width - 100
-                            height: 8
-                            radius: 4
-                            color: Theme.surfaceContainerHighest
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Rectangle {
-                                width: parent.width * (root.mediaUsage / 100)
-                                height: parent.height
-                                radius: 4
-                                color: Theme.secondary
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-                                }
-                            }
-                        }
-
-                        StyledText {
-                            width: 40
-                            text: `${root.mediaUsage.toFixed(0)}%`
-                            color: Theme.surfaceVariantText
-                            font.pixelSize: Theme.fontSizeSmall
-                            horizontalAlignment: Text.AlignRight
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
+                        label: "Media"
+                        value: root.mediaUsage
+                        barColor: Theme.secondary
                     }
                 }
             }
@@ -1436,6 +1211,99 @@ PluginComponent {
                 color: gaugeRoot.detailColor
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: gaugeRoot.detail.length > 0
+            }
+        }
+    }
+
+    // Stat card component for alt style
+    component StatCard: Rectangle {
+        id: statCardRoot
+        width: 100
+        height: 100
+        radius: 16
+        color: Theme.surfaceContainerHigh
+
+        property string iconName: ""
+        property color iconColor: Theme.primary
+        property string label: ""
+        property string valueText: ""
+        property real progressValue: 0  // 0-100
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: Theme.spacingM
+            spacing: Theme.spacingS
+
+            Row {
+                spacing: Theme.spacingS
+
+                DankIcon {
+                    name: statCardRoot.iconName
+                    size: 20
+                    color: statCardRoot.iconColor
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                StyledText {
+                    text: statCardRoot.label
+                    color: Theme.surfaceVariantText
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.weight: Font.Medium
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            StyledText {
+                text: statCardRoot.valueText
+                color: Theme.surfaceText
+                font.pixelSize: 28
+                font.weight: Font.Bold
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 4
+                radius: 2
+                color: Theme.surfaceContainerHighest
+
+                Rectangle {
+                    width: parent.width * (statCardRoot.progressValue / 100)
+                    height: parent.height
+                    radius: 2
+                    color: root.getUsageColor(statCardRoot.progressValue)
+
+                    Behavior on width {
+                        NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                    }
+                }
+            }
+        }
+    }
+
+    component ProgressBar: Item {
+        id: progressBarRoot
+        height: barHeight
+
+        property real value: 0  // 0-100
+        property real barHeight: 12
+        property real barRadius: barHeight / 2
+        property color barColor: Theme.primary
+        property color backgroundColor: Theme.surfaceText
+
+        Rectangle {
+            anchors.fill: parent
+            color: progressBarRoot.backgroundColor
+            radius: progressBarRoot.barRadius
+
+            Rectangle {
+                width: parent.width * Math.min(1, progressBarRoot.value / 100)
+                height: parent.height
+                color: progressBarRoot.barColor
+                radius: progressBarRoot.barRadius
+
+                Behavior on width {
+                    NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                }
             }
         }
     }
