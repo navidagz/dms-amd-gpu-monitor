@@ -24,6 +24,8 @@ PluginComponent {
     
     property int updateInterval: 4000
 
+    property bool minimumWidth: pluginData.minimumWidth !== undefined ? pluginData.minimumWidth : false
+
     Timer {
         id: updateTimer
         interval: root.updateInterval
@@ -121,19 +123,64 @@ PluginComponent {
 
             DankIcon {
                 name: "shadow"
-                color: Theme.surfaceText
+                size: root.iconSize
+                color: Theme.widgetIconColor
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            StyledText {
-                text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GB`
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.primary
+            Item {
                 anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: root.minimumWidth ? Math.max(textBaseline.width, gpuText.paintedWidth) : gpuText.paintedWidth
+                implicitHeight: gpuText.implicitHeight
+                width: implicitWidth
+                height: implicitHeight
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: Theme.shortDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                StyledTextMetrics {
+                    id: textBaseline
+                    font.pixelSize: Theme.fontSizeSmall
+                    text: "88% | 8.8GB"
+                }
+
+                StyledText {
+                    id: gpuText
+                    text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GB`
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.widgetTextColor
+                    anchors.fill: parent
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
         }
     }
-    
+
+    verticalBarPill: Component {
+        Column {
+            spacing: 1
+
+            DankIcon {
+                name: "shadow"
+                size: root.iconSize
+                color: Theme.widgetIconColor
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            StyledText {
+                text: `${root.gpuUsage.toFixed(0)}%`
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.widgetTextColor
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+        }
+    }
+
     // Popout content
     popoutContent: Component {
         PopoutComponent {
