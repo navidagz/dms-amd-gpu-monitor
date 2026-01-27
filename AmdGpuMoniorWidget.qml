@@ -104,11 +104,11 @@ PluginComponent {
     
     function formatVram() {
         if (root.vramTotal < 1024) {
-            return `${root.vramUsed.toFixed(0)}/${root.vramTotal.toFixed(0)} MB`;
+            return `${root.vramUsed.toFixed(0)}/${root.vramTotal.toFixed(0)} MiB`;
         } else {
-            const usedGB = (root.vramUsed / 1024).toFixed(1);
-            const totalGB = (root.vramTotal / 1024).toFixed(1);
-            return `${usedGB}/${totalGB} GB`;
+            const usedGiB = (root.vramUsed / 1024).toFixed(1);
+            const totalGiB = (root.vramTotal / 1024).toFixed(1);
+            return `${usedGiB}/${totalGiB} GiB`;
         }
     }
     
@@ -146,12 +146,12 @@ PluginComponent {
                 StyledTextMetrics {
                     id: textBaseline
                     font.pixelSize: Theme.fontSizeSmall
-                    text: "88% | 8.8GB"
+                    text: "88% | 8.8GiB"
                 }
 
                 StyledText {
                     id: gpuText
-                    text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GB`
+                    text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GiB`
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.widgetTextColor
                     anchors.fill: parent
@@ -589,7 +589,7 @@ PluginComponent {
                         }
 
                         StyledText {
-                            text: `${(root.vramUsed / 1024).toFixed(1)} GB`
+                            text: `${(root.vramUsed / 1024).toFixed(1)} GiB`
                             color: Theme.surfaceText
                             font.pixelSize: 28
                             font.weight: Font.Bold
@@ -1027,7 +1027,7 @@ PluginComponent {
                         width: parent.parent.gaugeSize
                         height: parent.parent.gaugeSize
                         value: root.vramPercent / 100
-                        label: (root.vramUsed / 1024).toFixed(1) + " GB"
+                        label: (root.vramUsed / 1024).toFixed(1) + " GiB"
                         sublabel: "VRAM"
                         detail: root.vramPercent.toFixed(0) + "%"
                         accentColor: root.vramPercent > 90 ? Theme.error : (root.vramPercent > 70 ? Theme.warning : Theme.secondary)
