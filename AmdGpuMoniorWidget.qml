@@ -384,112 +384,99 @@ PluginComponent {
                     font.bold: true
                 }
 
-                Rectangle {
+                DankListView {
                     width: parent.width
-                    height: processColumnDefault.implicitHeight
-                    radius: Theme.cornerRadius
+                    height: Math.min(contentHeight, 250)
+                    model: root.processes
+                    spacing: 1
                     clip: true
 
-                    Flickable {
-                        anchors.fill: parent
-                        contentHeight: processColumnDefault.implicitHeight
+                    delegate: Rectangle {
+                        width: ListView.view.width
+                        height: 50
+                        color: Theme.surfaceContainer
+                        radius: Theme.cornerRadius
 
-                        Column {
-                            id: processColumnDefault
-                            width: parent.width
-                            spacing: 1
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: Theme.spacingS
+                            spacing: Theme.spacingM
 
-                            Repeater {
-                                model: root.processes
+                            Column {
+                                width: 140
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
 
-                                Rectangle {
+                                StyledText {
                                     width: parent.width
-                                    height: 50
-                                    color: Theme.surfaceContainer
+                                    text: modelData.name
+                                    color: Theme.surfaceText
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                }
 
-                                    Row {
-                                        anchors.fill: parent
-                                        anchors.margins: Theme.spacingS
-                                        spacing: Theme.spacingM
+                                StyledText {
+                                    text: `PID: ${modelData.pid}`
+                                    color: Theme.surfaceVariantText
+                                    font.pixelSize: Theme.fontSizeSmall - 1
+                                }
+                            }
 
-                                        Column {
-                                            width: 140
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 2
+                            Column {
+                                width: 70
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
 
-                                            StyledText {
-                                                width: parent.width
-                                                text: modelData.name
-                                                color: Theme.surfaceText
-                                                font.pixelSize: Theme.fontSizeSmall
-                                                font.bold: true
-                                                elide: Text.ElideRight
-                                            }
+                                StyledText {
+                                    text: "VRAM"
+                                    color: Theme.surfaceVariantText
+                                    font.pixelSize: Theme.fontSizeSmall - 1
+                                }
 
-                                            StyledText {
-                                                text: `PID: ${modelData.pid}`
-                                                color: Theme.surfaceVariantText
-                                                font.pixelSize: Theme.fontSizeSmall - 1
-                                            }
-                                        }
+                                StyledText {
+                                    text: `${modelData.vram} ${modelData.vramUnit}`
+                                    color: Theme.primary
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    font.bold: true
+                                }
+                            }
 
-                                        Column {
-                                            width: 70
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 2
+                            Column {
+                                visible: modelData.gfx > 0
+                                width: 50
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
 
-                                            StyledText {
-                                                text: "VRAM"
-                                                color: Theme.surfaceVariantText
-                                                font.pixelSize: Theme.fontSizeSmall - 1
-                                            }
+                                StyledText {
+                                    text: "GPU"
+                                    color: Theme.surfaceVariantText
+                                    font.pixelSize: Theme.fontSizeSmall - 1
+                                }
 
-                                            StyledText {
-                                                text: `${modelData.vram} ${modelData.vramUnit}`
-                                                color: Theme.primary
-                                                font.pixelSize: Theme.fontSizeSmall
-                                                font.bold: true
-                                            }
-                                        }
+                                StyledText {
+                                    text: `${modelData.gfx}%`
+                                    color: Theme.surfaceText
+                                    font.pixelSize: Theme.fontSizeSmall
+                                }
+                            }
 
-                                        Column {
-                                            visible: modelData.gfx > 0
-                                            width: 50
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 2
+                            Column {
+                                visible: modelData.cpu > 0
+                                width: 50
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
 
-                                            StyledText {
-                                                text: "GPU"
-                                                color: Theme.surfaceVariantText
-                                                font.pixelSize: Theme.fontSizeSmall - 1
-                                            }
+                                StyledText {
+                                    text: "CPU"
+                                    color: Theme.surfaceVariantText
+                                    font.pixelSize: Theme.fontSizeSmall - 1
+                                }
 
-                                            StyledText {
-                                                text: `${modelData.gfx}%`
-                                                color: Theme.surfaceText
-                                                font.pixelSize: Theme.fontSizeSmall
-                                            }
-                                        }
-
-                                        Column {
-                                            visible: modelData.cpu > 0
-                                            width: 50
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 2
-
-                                            StyledText {
-                                                text: "CPU"
-                                                color: Theme.surfaceVariantText
-                                                font.pixelSize: Theme.fontSizeSmall - 1
-                                            }
-
-                                            StyledText {
-                                                text: `${modelData.cpu}%`
-                                                color: Theme.surfaceText
-                                                font.pixelSize: Theme.fontSizeSmall
-                                            }
-                                        }
-                                    }
+                                StyledText {
+                                    text: `${modelData.cpu}%`
+                                    color: Theme.surfaceText
+                                    font.pixelSize: Theme.fontSizeSmall
                                 }
                             }
                         }
