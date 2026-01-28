@@ -11,6 +11,7 @@
         "monitoring"
     ],
     "component": "./AmdGpuMoniorWidget.qml",
+    "settings": "./AmdGpuMonitorSettings.qml",
     "icon": "memory",
     "requires": [
         "amdgpu_top"
