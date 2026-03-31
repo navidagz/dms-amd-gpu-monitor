@@ -26,6 +26,10 @@ PluginComponent {
 
     property bool minimumWidth: pluginData.minimumWidth !== undefined ? pluginData.minimumWidth : false
     property string popoutStyle: pluginData.popoutStyle || "default"
+    readonly property int defaultProcessListHeight: popoutStyle === "default" ? 220 : 250
+    property int processListHeight: pluginData.processListHeight > 0
+        ? pluginData.processListHeight
+        : root.defaultProcessListHeight
     readonly property string popoutStyleSource: {
         switch (popoutStyle) {
             case "alt":

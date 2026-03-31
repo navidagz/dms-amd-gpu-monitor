@@ -142,7 +142,7 @@ Column {
 
         DankListView {
             width: parent.width
-            height: Math.min(contentHeight, commonStyles.compactProcessListMaxHeight)
+            height: Math.min(contentHeight, root.processListHeight)
             model: root.processes
             spacing: 2
             clip: true
