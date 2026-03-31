@@ -33,11 +33,11 @@ PluginComponent {
     readonly property string popoutStyleSource: {
         switch (popoutStyle) {
             case "alt":
-                return "styles/popout/AltStyle.qml";
+                return "components/styles/AltStyle.qml";
             case "legacy":
-                return "styles/popout/LegacyStyle.qml";
+                return "components/styles/LegacyStyle.qml";
             default:
-                return "styles/popout/DefaultStyle.qml";
+                return "components/styles/DefaultStyle.qml";
         }
     }
 
