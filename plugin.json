@@ -10,7 +10,7 @@
         "dankbar-widget",
         "monitoring"
     ],
-    "component": "./AmdGpuMoniorWidget.qml",
+    "component": "./AmdGpuMonitorWidget.qml",
     "settings": "./AmdGpuMonitorSettings.qml",
     "icon": "memory",
     "requires": [
