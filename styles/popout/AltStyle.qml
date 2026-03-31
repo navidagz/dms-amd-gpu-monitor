@@ -141,7 +141,7 @@ Column {
                 width: parent.width
                 label: "Media"
                 value: root.mediaUsage
-                barColor: Theme.secondary
+                barColor: Theme.info
             }
         }
     }
