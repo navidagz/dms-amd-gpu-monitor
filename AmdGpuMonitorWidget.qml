@@ -30,8 +30,8 @@ PluginComponent {
         switch (popoutStyle) {
             case "alt":
                 return "styles/popout/AltStyle.qml";
-            case "dms":
-                return "styles/popout/DmsStyle.qml";
+            case "legacy":
+                return "styles/popout/LegacyStyle.qml";
             default:
                 return "styles/popout/DefaultStyle.qml";
         }
