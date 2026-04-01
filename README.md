@@ -22,7 +22,7 @@ Real-time AMD GPU monitoring for DankMaterialShell. Tracks usage, VRAM, temperat
 yay -S amdgpu_top
 
 # Install plugin
-cp -r AmdGpuMonior ~/.config/DankMaterialShell/plugins/
+cp -r AmdGpuMonitor ~/.config/DankMaterialShell/plugins/
 ```
 
 ## Usage

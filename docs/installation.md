@@ -31,7 +31,7 @@ sudo cp target/release/amdgpu_top /usr/local/bin/
 
 1. Copy the plugin folder to your DankMaterialShell plugins directory:
    ```bash
-   cp -r AmdGpuMonior ~/.config/DankMaterialShell/plugins/
+   cp -r AmdGpuMonitor ~/.config/DankMaterialShell/plugins/
    ```
 
 2. The plugin should be automatically detected by DankMaterialShell
