@@ -45,9 +45,9 @@ PluginSettings {
     SliderSetting {
         settingKey: "processListHeight"
         label: "Process List Height"
-        description: "Maximum height for the GPU process list. 0 = style default."
-        defaultValue: 0
-        minimum: 0
+        description: "Maximum height for the GPU process list."
+        defaultValue: 250
+        minimum: 100
         maximum: 750
         unit: "px"
     }
