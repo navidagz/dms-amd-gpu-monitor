@@ -22,8 +22,11 @@ Real-time AMD GPU monitoring plugin (v2.0.0) for DankMaterialShell. Tracks usage
 ```bash
 # Install amdgpu_top (Arch)
 yay -S amdgpu_top
+```
 
-# Install plugin
+Install the plugin via the DankMaterialShell plugin store, or manually:
+
+```bash
 cp -r AmdGpuMonitor ~/.config/DankMaterialShell/plugins/
 ```
 
