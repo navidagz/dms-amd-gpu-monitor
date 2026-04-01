@@ -11,6 +11,7 @@ title: Installation Guide
 - `amdgpu_top` utility installed and accessible in PATH
 - QuickShell
 - DankMaterialShell framework
+- Linux kernel 5.14+ (required for per-process fdinfo GPU stats)
 
 ## Installing amdgpu_top
 
@@ -34,7 +35,7 @@ sudo cp target/release/amdgpu_top /usr/local/bin/
    cp -r AmdGpuMonitor ~/.config/DankMaterialShell/plugins/
    ```
 
-2. The plugin should be automatically detected by DankMaterialShell
+2. The plugin is automatically detected by DankMaterialShell on next startup.
 
 ## Permissions
 
@@ -45,3 +46,4 @@ Some systems may require additional permissions to access GPU metrics:
 sudo usermod -a -G video $USER
 # Log out and back in for changes to take effect
 ```
+

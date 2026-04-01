@@ -5,7 +5,7 @@ title: Documentation
 
 # AMD GPU Monitor Documentation
 
-Welcome to the AMD GPU Monitor documentation. This plugin provides real-time monitoring of AMD GPU statistics for DankMaterialShell.
+Welcome to the AMD GPU Monitor documentation. This plugin (v2.0.0) provides real-time monitoring of AMD GPU statistics for DankMaterialShell.
 
 ## Quick Navigation
 
@@ -20,10 +20,10 @@ Welcome to the AMD GPU Monitor documentation. This plugin provides real-time mon
 ## Overview
 
 AMD GPU Monitor tracks:
-- GPU usage (GFX, Memory, Media Engine)
-- VRAM statistics
-- Temperature and power consumption
-- Per-process GPU metrics
+- GPU usage — overall % is the max of GFX, Memory, and Media Engine activity
+- VRAM statistics with auto-scaling display (MiB or GiB)
+- Temperature (edge sensor, °C) and average power consumption (W)
+- Per-process GPU metrics, filtered to processes actively using the GPU
 
 ## Screenshots
 
@@ -37,9 +37,11 @@ AMD GPU Monitor tracks:
 
 ## Features at a Glance
 
-✓ Real-time GPU monitoring  
-✓ VRAM usage tracking  
-✓ Temperature and power metrics  
-✓ Per-process statistics  
-✓ Color-coded indicators  
-✓ Smooth animations  
+- Real-time GPU monitoring
+- VRAM usage tracking
+- Temperature and power metrics
+- Per-process statistics
+- Color-coded indicators
+- Smooth animations
+- Three popout visual styles (Default, Alternative, Legacy)
+- Settings UI — no manual file editing required
