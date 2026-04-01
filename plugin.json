@@ -1,24 +1,24 @@
 {
-    "id": "amdGpuMonitor",
-    "name": "AMD GPU Monitor",
-    "description": "Monitor AMD GPU usage, VRAM, temperature, power consumption and process usage.",
-    "category": "monitoring",
-    "version": "1.0.0",
-    "author": "Navid A.",
-    "type": "widget",
-    "capabilities": [
-        "dankbar-widget",
-        "monitoring"
-    ],
-    "component": "./AmdGpuMonitorWidget.qml",
-    "settings": "./AmdGpuMonitorSettings.qml",
-    "icon": "memory",
-    "requires": [
-        "amdgpu_top"
-    ],
-    "permissions": [
-        "settings_read",
-        "settings_write",
-        "process"
-    ]
+  "id": "amdGpuMonitor",
+  "name": "AMD GPU Monitor",
+  "description": "Monitor AMD GPU usage, VRAM, temperature, power consumption and process usage.",
+  "category": "monitoring",
+  "version": "2.0.0",
+  "author": "Navid A.",
+  "type": "widget",
+  "capabilities": [
+    "dankbar-widget",
+    "monitoring"
+  ],
+  "component": "./AmdGpuMonitorWidget.qml",
+  "settings": "./AmdGpuMonitorSettings.qml",
+  "icon": "memory",
+  "requires": [
+    "amdgpu_top"
+  ],
+  "permissions": [
+    "settings_read",
+    "settings_write",
+    "process"
+  ]
 }
