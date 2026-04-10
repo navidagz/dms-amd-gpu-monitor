@@ -9,6 +9,9 @@ import qs.Modules.Plugins
 PluginComponent {
     id: root
 
+    property string variantId: ""
+    property var variantData: null
+
     property real gpuUsage: 0.0
     property real vramUsed: 0.0
     property real vramTotal: 0.0
@@ -23,10 +26,12 @@ PluginComponent {
     property real mediaUsage: 0.0
 
     property int updateInterval: 4000
+    property string temperatureSysfsPath: ""
 
-    property bool minimumWidth: pluginData.minimumWidth !== undefined ? pluginData.minimumWidth : false
-    property string popoutStyle: pluginData.popoutStyle || "default"
-    property int processListHeight: pluginData.processListHeight || 250
+    property bool minimumWidth: variantData?.minimumWidth ?? pluginData.minimumWidth ?? false
+    property int gpuIndex: Math.max(0, parseInt(variantData?.gpuIndex ?? "0") || 0)
+    property string popoutStyle: variantData?.popoutStyle ?? pluginData.popoutStyle ?? "default"
+    property int processListHeight: Math.max(100, Math.min(750, parseInt(variantData?.processListHeight ?? pluginData.processListHeight ?? "250") || 250))
     readonly property string popoutStyleSource: {
         switch (popoutStyle) {
             case "alt":
@@ -48,6 +53,22 @@ PluginComponent {
     }
 
     Process {
+        id: updateTemperatureFallbackProcess
+        command: []
+        running: false
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const rawValue = text.trim();
+                const milliCelsius = parseInt(rawValue);
+                if (!isNaN(milliCelsius) && milliCelsius > 0) {
+                    root.temperature = Math.round(milliCelsius / 1000);
+                }
+            }
+        }
+    }
+
+    Process {
         id: updateGpuStatsProcess
         command: ["amdgpu_top", "-J", "-n", "1"]
         running: false
@@ -56,27 +77,47 @@ PluginComponent {
             onStreamFinished: {
                 const output = text.trim();
                 const data = JSON.parse(output);
-                const amd_gpu = data.devices[0];
+                const devices = Array.isArray(data.devices) ? data.devices : [];
+                const selectedGpu = devices[root.gpuIndex] || devices[0];
 
-                root.gpuName = amd_gpu["Info"]["DeviceName"] || "AMD GPU";
+                if (!selectedGpu) {
+                    root.gpuName = "AMD GPU";
+                    root.gfxUsage = 0.0;
+                    root.memUsage = 0.0;
+                    root.mediaUsage = 0.0;
+                    root.gpuUsage = 0.0;
+                    root.vramUsed = 0.0;
+                    root.vramTotal = 0.0;
+                    root.vramPercent = 0.0;
+                    root.temperature = 0;
+                    root.powerUsage = 0;
+                    root.temperatureSysfsPath = "";
+                    root.processes = [];
+                    return;
+                }
 
-                root.gfxUsage = parseFloat(amd_gpu.gpu_activity["GFX"].value) || 0.0;
-                root.memUsage = parseFloat(amd_gpu.gpu_activity["Memory"].value) || 0.0;
-                root.mediaUsage = parseFloat(amd_gpu.gpu_activity["MediaEngine"].value) || 0.0;
+                root.gpuName = selectedGpu["Info"]?.["DeviceName"] || `AMD GPU ${root.gpuIndex}`;
+                root.temperatureSysfsPath = root.getTemperatureSysfsPath(selectedGpu);
+
+                root.gfxUsage = parseFloat(selectedGpu.gpu_activity?.["GFX"]?.value) || 0.0;
+                root.memUsage = parseFloat(selectedGpu.gpu_activity?.["Memory"]?.value) || 0.0;
+                root.mediaUsage = parseFloat(selectedGpu.gpu_activity?.["MediaEngine"]?.value) || 0.0;
                 root.gpuUsage = Math.max(root.gfxUsage, root.memUsage, root.mediaUsage);
 
-                root.vramUsed = parseFloat(amd_gpu["VRAM"]["Total VRAM Usage"].value) || 0.0;
-                root.vramTotal = parseFloat(amd_gpu["VRAM"]["Total VRAM"].value) || 0.0;
+                root.vramUsed = parseFloat(selectedGpu["VRAM"]?.["Total VRAM Usage"]?.value) || 0.0;
+                root.vramTotal = parseFloat(selectedGpu["VRAM"]?.["Total VRAM"]?.value) || 0.0;
                 root.vramPercent = root.vramTotal > 0
                     ? (root.vramUsed / root.vramTotal * 100) : 0.0;
-                root.temperature = parseInt(amd_gpu.gpu_metrics.temperature_edge) || 0;
-                root.powerUsage = parseInt(amd_gpu.Sensors["Average Power"].value) || 0;
+                root.temperature = root.extractTemperature(selectedGpu);
+                if (root.temperature <= 0)
+                    root.refreshTemperatureFromSysfs();
+                root.powerUsage = parseInt(selectedGpu.Sensors?.["Average Power"]?.value) || 0;
 
-                if (amd_gpu.fdinfo) {
+                if (selectedGpu.fdinfo) {
                     const processList = [];
 
-                    Object.keys(amd_gpu.fdinfo).forEach(pid => {
-                        const procInfo = amd_gpu.fdinfo[pid];
+                    Object.keys(selectedGpu.fdinfo).forEach(pid => {
+                        const procInfo = selectedGpu.fdinfo[pid];
                         const usage = procInfo.usage?.usage;
                         if (!usage) return;
 
@@ -100,6 +141,8 @@ PluginComponent {
 
                     processList.sort((a, b) => b.vram - a.vram);
                     root.processes = processList;
+                } else {
+                    root.processes = [];
                 }
             }
         }
@@ -113,6 +156,51 @@ PluginComponent {
         const usedGiB = (root.vramUsed / 1024).toFixed(1);
         const totalGiB = (root.vramTotal / 1024).toFixed(1);
         return `${usedGiB}/${totalGiB} GiB`;
+    }
+
+    function extractTemperature(selectedGpu) {
+        const edgeTemp = parseInt(selectedGpu?.gpu_metrics?.temperature_edge);
+        if (!isNaN(edgeTemp) && edgeTemp > 0)
+            return edgeTemp;
+
+        const sensorsEdgeTemp = parseInt(selectedGpu?.Sensors?.["Edge Temperature"]?.value);
+        if (!isNaN(sensorsEdgeTemp) && sensorsEdgeTemp > 0)
+            return sensorsEdgeTemp;
+
+        const gfxTemp = parseInt(selectedGpu?.gpu_metrics?.temperature_gfx);
+        if (!isNaN(gfxTemp) && gfxTemp > 0)
+            return Math.round(gfxTemp / 100);
+
+        return 0;
+    }
+
+    function getTemperatureSysfsPath(selectedGpu) {
+        const infoDevicePath = selectedGpu?.Info?.DevicePath;
+        const directPath = infoDevicePath?.sysfs_path
+            || selectedGpu?.DevicePath?.sysfs_path
+            || selectedGpu?.device_path?.sysfs_path
+            || selectedGpu?.sysfs_path;
+        if (directPath)
+            return directPath;
+
+        const pciAddress = infoDevicePath?.pci
+            || selectedGpu?.PCI
+            || selectedGpu?.pci;
+        if (pciAddress)
+            return `/sys/bus/pci/devices/${pciAddress}`;
+
+        return "";
+    }
+
+    function refreshTemperatureFromSysfs() {
+        if (!root.temperatureSysfsPath || updateTemperatureFallbackProcess.running)
+            return;
+        updateTemperatureFallbackProcess.command = [
+            "sh",
+            "-c",
+            `for hw in "${root.temperatureSysfsPath}"/hwmon/*; do [ -f "$hw/temp1_input" ] && cat "$hw/temp1_input" && exit 0; done; exit 1`
+        ];
+        updateTemperatureFallbackProcess.running = true;
     }
 
     function getUsageColor(percent) {
@@ -134,8 +222,8 @@ PluginComponent {
 
             Item {
                 anchors.verticalCenter: parent.verticalCenter
-                implicitWidth: root.minimumWidth ? Math.max(textBaseline.width, gpuText.paintedWidth) : gpuText.paintedWidth
-                implicitHeight: gpuText.implicitHeight
+                implicitWidth: root.minimumWidth ? Math.max(textBaseline.width, currentTextMetrics.width) : currentTextMetrics.width
+                implicitHeight: currentTextMetrics.height
                 width: implicitWidth
                 height: implicitHeight
 
@@ -152,12 +240,21 @@ PluginComponent {
                     text: "88% | 8.8GiB"
                 }
 
+                StyledTextMetrics {
+                    id: currentTextMetrics
+                    font.pixelSize: Theme.fontSizeSmall
+                    text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GiB`
+                }
+
                 StyledText {
                     id: gpuText
-                    text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GiB`
+                    text: currentTextMetrics.text
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.widgetTextColor
                     anchors.fill: parent
+                    wrapMode: Text.NoWrap
+                    maximumLineCount: 1
+                    elide: Text.ElideNone
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -194,7 +291,6 @@ PluginComponent {
             Loader {
                 id: popoutLoader
                 width: parent.width
-
                 function loadStyle() {
                     setSource(root.popoutStyleSource, { "root": root });
                 }

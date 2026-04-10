@@ -16,6 +16,8 @@ Item {
     readonly property real thickness: Math.max(4, Math.min(width, height) / 15)
     readonly property real glowExtra: thickness * 1.4
     readonly property real arcPadding: thickness / 1.3
+    readonly property real glowPadding: (thickness + glowExtra) / 2
+    readonly property real arcRadius: (Math.min(width, height) / 2) - arcPadding
 
     readonly property real innerDiameter: width - (arcPadding + thickness + glowExtra) * 2
     readonly property real maxTextWidth: innerDiameter * 0.9
@@ -40,13 +42,13 @@ Item {
     Canvas {
         id: glowCanvas
         anchors.fill: parent
+        anchors.margins: -gaugeRoot.glowPadding
 
         onPaint: {
             const ctx = getContext("2d");
             ctx.reset();
             const cx = width / 2;
             const cy = height / 2;
-            const radius = (Math.min(width, height) / 2) - gaugeRoot.arcPadding;
             const startAngle = -Math.PI * 0.5;
             const endAngle = Math.PI * 1.5;
 
@@ -55,7 +57,7 @@ Item {
             if (gaugeRoot.animValue > 0) {
                 const prog = startAngle + (endAngle - startAngle) * gaugeRoot.animValue;
                 ctx.beginPath();
-                ctx.arc(cx, cy, radius, startAngle, prog);
+                ctx.arc(cx, cy, gaugeRoot.arcRadius, startAngle, prog);
                 ctx.strokeStyle = Qt.rgba(gaugeRoot.accentColor.r, gaugeRoot.accentColor.g, gaugeRoot.accentColor.b, 0.2);
                 ctx.lineWidth = gaugeRoot.thickness + gaugeRoot.glowExtra;
                 ctx.stroke();
@@ -82,14 +84,13 @@ Item {
             ctx.reset();
             const cx = width / 2;
             const cy = height / 2;
-            const radius = (Math.min(width, height) / 2) - gaugeRoot.arcPadding;
             const startAngle = -Math.PI * 0.5;
             const endAngle = Math.PI * 1.5;
 
             ctx.lineCap = "round";
 
             ctx.beginPath();
-            ctx.arc(cx, cy, radius, startAngle, endAngle);
+            ctx.arc(cx, cy, gaugeRoot.arcRadius, startAngle, endAngle);
             ctx.strokeStyle = Qt.rgba(gaugeRoot.accentColor.r, gaugeRoot.accentColor.g, gaugeRoot.accentColor.b, 0.1);
             ctx.lineWidth = gaugeRoot.thickness;
             ctx.stroke();
@@ -97,7 +98,7 @@ Item {
             if (gaugeRoot.animValue > 0) {
                 const prog = startAngle + (endAngle - startAngle) * gaugeRoot.animValue;
                 ctx.beginPath();
-                ctx.arc(cx, cy, radius, startAngle, prog);
+                ctx.arc(cx, cy, gaugeRoot.arcRadius, startAngle, prog);
                 ctx.strokeStyle = gaugeRoot.accentColor;
                 ctx.lineWidth = gaugeRoot.thickness;
                 ctx.stroke();

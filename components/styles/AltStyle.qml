@@ -1,6 +1,7 @@
 import QtQuick
 
 import qs.Common
+import qs.Services
 import qs.Widgets
 
 import "../shared" as Shared
@@ -102,7 +103,6 @@ Column {
     }
 
     Rectangle {
-        visible: root.gfxUsage > 0 || root.memUsage > 0 || root.mediaUsage > 0
         width: parent.width
         height: engineColumn.height + Theme.spacingM * 2
         radius: commonStyles.largePanelRadius
@@ -189,24 +189,38 @@ Column {
                     anchors.rightMargin: Theme.spacingM
                     spacing: Theme.spacingS
 
-                    Column {
+                    Row {
                         width: parent.width - procBadgesRow.width - Theme.spacingS
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 2
+                        spacing: Theme.spacingS
 
-                        StyledText {
-                            width: parent.width
-                            text: modelData.name
+                        DankIcon {
+                            name: DgopService.getProcessIcon(modelData.name || "")
+                            size: Theme.iconSize - 4
                             color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            font.weight: Font.Medium
-                            elide: Text.ElideRight
+                            opacity: 0.8
+                            anchors.verticalCenter: parent.verticalCenter
                         }
 
-                        StyledText {
-                            text: `PID ${modelData.pid}`
-                            color: Theme.surfaceVariantText
-                            font.pixelSize: Theme.fontSizeSmall - 2
+                        Column {
+                            width: parent.width - (Theme.iconSize - 4) - Theme.spacingS
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 2
+
+                            StyledText {
+                                width: parent.width
+                                text: modelData.name
+                                color: Theme.surfaceText
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.weight: Font.Medium
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                text: `PID ${modelData.pid}`
+                                color: Theme.surfaceVariantText
+                                font.pixelSize: Theme.fontSizeSmall - 2
+                            }
                         }
                     }
 

@@ -1,6 +1,7 @@
 import QtQuick
 
 import qs.Common
+import qs.Services
 import qs.Widgets
 
 import "../shared" as Shared
@@ -17,13 +18,14 @@ Column {
 
     Item {
         width: parent.width
-        height: gaugesRow.height
+        height: gaugesRow.height + Theme.spacingM * 2
 
         readonly property real gaugeSize: Theme.fontSizeMedium * 6.5
 
         Row {
             id: gaugesRow
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             spacing: Theme.spacingM
 
             Shared.CircleGauge {
@@ -60,7 +62,6 @@ Column {
     }
 
     Rectangle {
-        visible: root.gfxUsage > 0 || root.memUsage > 0 || root.mediaUsage > 0
         width: parent.width
         height: engineContent.height + Theme.spacingM * 2
         radius: Theme.cornerRadius
@@ -181,7 +182,7 @@ Column {
                             spacing: Theme.spacingS
 
                             DankIcon {
-                                name: "terminal"
+                                name: DgopService.getProcessIcon(modelData.name || "")
                                 size: Theme.iconSize - 4
                                 color: Theme.surfaceText
                                 opacity: 0.8

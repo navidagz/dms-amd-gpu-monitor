@@ -1,6 +1,7 @@
 import QtQuick
 
 import qs.Common
+import qs.Services
 import qs.Widgets
 
 import "../shared" as Shared
@@ -78,7 +79,6 @@ Column {
     }
 
     Column {
-        visible: root.gfxUsage > 0
         width: parent.width
         spacing: Theme.spacingS
 
@@ -183,24 +183,38 @@ Column {
                     anchors.margins: Theme.spacingS
                     spacing: Theme.spacingM
 
-                    Column {
-                        width: 140
+                    Row {
+                        width: 170
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 2
+                        spacing: Theme.spacingS
 
-                        StyledText {
-                            width: parent.width
-                            text: modelData.name
+                        DankIcon {
+                            name: DgopService.getProcessIcon(modelData.name || "")
+                            size: Theme.iconSize - 4
                             color: Theme.surfaceText
-                            font.pixelSize: Theme.fontSizeSmall
-                            font.bold: true
-                            elide: Text.ElideRight
+                            opacity: 0.8
+                            anchors.verticalCenter: parent.verticalCenter
                         }
 
-                        StyledText {
-                            text: `PID: ${modelData.pid}`
-                            color: Theme.surfaceVariantText
-                            font.pixelSize: Theme.fontSizeSmall - 1
+                        Column {
+                            width: 140
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 2
+
+                            StyledText {
+                                width: parent.width
+                                text: modelData.name
+                                color: Theme.surfaceText
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.bold: true
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                text: `PID: ${modelData.pid}`
+                                color: Theme.surfaceVariantText
+                                font.pixelSize: Theme.fontSizeSmall - 1
+                            }
                         }
                     }
 
