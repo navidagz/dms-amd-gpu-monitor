@@ -77,7 +77,7 @@ Use this when you want:
 
 To create a GPU-specific widget:
 
-![gpu-variant](gpu-variant.png)
+![gpu-variant](screenshots/gpu-variant.png)
 
 1. Open DMS Settings -> Plugins -> AMD GPU Monitor
 2. Scroll to **GPU Variants**
