@@ -28,7 +28,7 @@ PluginComponent {
     property int updateInterval: 4000
     property string temperatureSysfsPath: ""
 
-    property bool minimumWidth: variantData?.minimumWidth ?? pluginData.minimumWidth ?? false
+    property bool minimumWidth: variantData?.minimumWidth ?? pluginData.minimumWidth ?? true
     property int gpuIndex: Math.max(0, parseInt(variantData?.gpuIndex ?? "0") || 0)
     property string popoutStyle: variantData?.popoutStyle ?? pluginData.popoutStyle ?? "default"
     property int processListHeight: Math.max(100, Math.min(750, parseInt(variantData?.processListHeight ?? pluginData.processListHeight ?? "250") || 250))
@@ -97,7 +97,6 @@ PluginComponent {
                 }
 
                 root.gpuName = selectedGpu["Info"]?.["DeviceName"] || `AMD GPU ${root.gpuIndex}`;
-                root.temperatureSysfsPath = root.getTemperatureSysfsPath(selectedGpu);
 
                 root.gfxUsage = parseFloat(selectedGpu.gpu_activity?.["GFX"]?.value) || 0.0;
                 root.memUsage = parseFloat(selectedGpu.gpu_activity?.["Memory"]?.value) || 0.0;
@@ -108,9 +107,13 @@ PluginComponent {
                 root.vramTotal = parseFloat(selectedGpu["VRAM"]?.["Total VRAM"]?.value) || 0.0;
                 root.vramPercent = root.vramTotal > 0
                     ? (root.vramUsed / root.vramTotal * 100) : 0.0;
-                root.temperature = root.extractTemperature(selectedGpu);
-                if (root.temperature <= 0)
-                    root.refreshTemperatureFromSysfs();
+                const extractedTemperature = root.extractTemperature(selectedGpu);
+                if (extractedTemperature > 0) {
+                    root.temperature = extractedTemperature;
+                    root.temperatureSysfsPath = "";
+                } else if (!root.refreshTemperatureFromSysfs(selectedGpu)) {
+                    root.temperature = 0;
+                }
                 root.powerUsage = parseInt(selectedGpu.Sensors?.["Average Power"]?.value) || 0;
 
                 if (selectedGpu.fdinfo) {
@@ -174,33 +177,76 @@ PluginComponent {
         return 0;
     }
 
+    function normalizeSysfsPath(path) {
+        if (typeof path !== "string")
+            return "";
+
+        const normalizedPath = path.trim().replace(/\/+$/, "");
+        return normalizedPath.startsWith("/sys/") ? normalizedPath : "";
+    }
+
+    function normalizePciAddress(address) {
+        if (typeof address !== "string")
+            return "";
+
+        const normalizedAddress = address.trim();
+        return /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$/.test(normalizedAddress)
+            ? normalizedAddress
+            : "";
+    }
+
     function getTemperatureSysfsPath(selectedGpu) {
         const infoDevicePath = selectedGpu?.Info?.DevicePath;
-        const directPath = infoDevicePath?.sysfs_path
-            || selectedGpu?.DevicePath?.sysfs_path
-            || selectedGpu?.device_path?.sysfs_path
-            || selectedGpu?.sysfs_path;
+        const nestedDevicePath = selectedGpu?.DevicePath;
+        const legacyDevicePath = selectedGpu?.device_path;
+        const directPath = root.normalizeSysfsPath(
+            (typeof infoDevicePath === "string" ? infoDevicePath : infoDevicePath?.sysfs_path)
+            || (typeof nestedDevicePath === "string" ? nestedDevicePath : nestedDevicePath?.sysfs_path)
+            || (typeof legacyDevicePath === "string" ? legacyDevicePath : legacyDevicePath?.sysfs_path)
+            || selectedGpu?.sysfs_path
+        );
         if (directPath)
             return directPath;
 
-        const pciAddress = infoDevicePath?.pci
+        const pciAddress = root.normalizePciAddress(
+            infoDevicePath?.pci
             || selectedGpu?.PCI
-            || selectedGpu?.pci;
+            || selectedGpu?.pci
+        );
         if (pciAddress)
             return `/sys/bus/pci/devices/${pciAddress}`;
 
         return "";
     }
 
-    function refreshTemperatureFromSysfs() {
-        if (!root.temperatureSysfsPath || updateTemperatureFallbackProcess.running)
-            return;
+    function refreshTemperatureFromSysfs(selectedGpu) {
+        if (updateTemperatureFallbackProcess.running)
+            return true;
+
+        const sysfsPath = root.getTemperatureSysfsPath(selectedGpu);
+        root.temperatureSysfsPath = sysfsPath;
+        if (!sysfsPath)
+            return false;
+
         updateTemperatureFallbackProcess.command = [
-            "sh",
-            "-c",
-            `for hw in "${root.temperatureSysfsPath}"/hwmon/*; do [ -f "$hw/temp1_input" ] && cat "$hw/temp1_input" && exit 0; done; exit 1`
+            "find",
+            `${sysfsPath}/hwmon`,
+            "-mindepth",
+            "2",
+            "-maxdepth",
+            "2",
+            "-type",
+            "f",
+            "-name",
+            "temp1_input",
+            "-exec",
+            "cat",
+            "{}",
+            ";",
+            "-quit"
         ];
         updateTemperatureFallbackProcess.running = true;
+        return true;
     }
 
     function getUsageColor(percent) {

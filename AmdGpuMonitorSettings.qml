@@ -41,7 +41,7 @@ PluginSettings {
         settingKey: "minimumWidth"
         label: "Force Padding"
         description: "Prevent widget width from changing as values update"
-        defaultValue: false
+        defaultValue: true
     }
 
     SelectionSetting {
@@ -59,7 +59,7 @@ PluginSettings {
     StringSetting {
         settingKey: "processListHeight"
         label: "Process List Height (px)"
-        description: "Maximum height for the GPU process list. Enter a value between 100 and 750."
+        description: "Maximum height for the GPU process list. The widget clamps the effective value to its supported range."
         placeholder: "250"
         defaultValue: "250"
     }
@@ -190,7 +190,7 @@ PluginSettings {
                     required property var modelData
 
                     width: parent.width
-                    height: 44
+                    height: variantRow.implicitHeight + Theme.spacingM * 2
                     radius: Theme.cornerRadius
                     color: Theme.surfaceContainer
 
@@ -201,9 +201,10 @@ PluginSettings {
                         spacing: Theme.spacingS
 
                         Column {
+                            id: variantRow
                             width: parent.width - deleteVariantButton.width - Theme.spacingS
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2
+                            spacing: Theme.spacingXS
 
                             StyledText {
                                 width: parent.width

@@ -2,7 +2,7 @@
 
 Real-time AMD GPU monitoring plugin (v2.0.0) for DankMaterialShell. Tracks GPU usage, VRAM, temperature, power, and per-process activity for AMD GPUs, with support for multiple GPU-specific widget variants.
 
-![Screenshot](screenshot.png)
+![Screenshot](overview.png)
 
 ## Features
 
@@ -97,7 +97,7 @@ Available in the DMS settings UI:
 - `Popout Style`
   Switches between `Default`, `Alternative`, and `Legacy`.
 - `Process List Height`
-  Controls the maximum process list height in the popout.
+  Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range.
 - `GPU Variants`
   Creates and manages GPU-specific widget variants for multi-GPU systems.
 
@@ -106,6 +106,7 @@ Available in the DMS settings UI:
 - The base plugin can still be added directly and defaults to GPU index `0`.
 - For multi-GPU systems, prefer creating named variants instead of reusing the base widget.
 - Temperature data is read from `amdgpu_top` first, with fallback handling for GPUs that expose temperature via different sensor fields or sysfs.
+- When a sysfs fallback is needed, the plugin resolves the GPU path from device metadata and reads the first `hwmon/*/temp1_input` entry via a direct `find` invocation without shell interpolation.
 
 ## Documentation
 
