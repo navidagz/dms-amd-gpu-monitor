@@ -2,7 +2,7 @@
 
 Real-time AMD GPU monitoring plugin (v2.0.0) for DankMaterialShell. Tracks GPU usage, VRAM, temperature, power, and per-process activity for AMD GPUs, with support for multiple GPU-specific widget variants.
 
-![Screenshot](overview.png)
+![Screenshot](screenshots/screenshot.png)
 
 ## Features
 
@@ -125,4 +125,4 @@ MIT License — Copyright 2026 Navid A.
 
 Built for [DankMaterialShell](https://github.com/DankMaterialShell) • Uses [amdgpu_top](https://github.com/Umio-Yasuno/amdgpu_top)
 
-Special thanks to [@skrimix](https://github.com/skrimix) for contributions and feedback.
+Special thanks to [@skrimix](https://github.com/skrimix) and [@Tz-slayer](https://github.com/Tz-slayer) for contributions and feedback.
