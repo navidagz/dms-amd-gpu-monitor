@@ -15,7 +15,7 @@ Real-time AMD GPU monitoring plugin (v2.0.0) for DankMaterialShell. Tracks GPU u
 - Three switchable popout visual styles:
   - `Default` — circular gauges
   - `Alternative` — stat cards and chips
-  - `Legacy` — compact text and progress bars
+  - `Legacy` — compact text and progress barsimg.shields.io
 - Multi-GPU widget variants — create separate widgets for GPU 0, GPU 1, and so on
 - Configurable via DankMaterialShell settings UI — no manual file editing required
 
@@ -112,10 +112,10 @@ Available in the DMS settings UI:
 
 [Full Documentation](https://navidagz.github.io/dms-amd-gpu-monitor/docs/)
 
-- [Installation Guide](https://navidagz.github.io/dms-amd-gpu-monitor/docs/installation)
-- [Configuration](https://navidagz.github.io/dms-amd-gpu-monitor/docs/configuration)
-- [Troubleshooting](https://navidagz.github.io/dms-amd-gpu-monitor/docs/troubleshooting)
-- [Technical Details](https://navidagz.github.io/dms-amd-gpu-monitor/docs/technical-details)
+- [Installation Guide](docs/installation.md)
+- [Configuration](docs/configuration.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Technical Details](docs/technical-details.md)
 
 ## License
 
