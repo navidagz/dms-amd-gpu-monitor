@@ -50,13 +50,35 @@ PluginComponent {
         running: true
         repeat: true
         triggeredOnStart: true
-        onTriggered: updateGpuStatsProcess.running = true
+        onTriggered: {
+            if (!updateGpuStatsProcess.running)
+                updateGpuStatsProcess.running = true;
+        }
+    }
+
+    Timer {
+        id: temperatureFallbackTimeoutTimer
+        interval: 3000
+        running: false
+        repeat: false
+        onTriggered: {
+            if (updateTemperatureFallbackProcess.running)
+                updateTemperatureFallbackProcess.running = false;
+        }
     }
 
     Process {
         id: updateTemperatureFallbackProcess
         command: []
         running: false
+
+        onRunningChanged: {
+            if (running) {
+                temperatureFallbackTimeoutTimer.restart();
+            } else {
+                temperatureFallbackTimeoutTimer.stop();
+            }
+        }
 
         stdout: StdioCollector {
             onStreamFinished: {
