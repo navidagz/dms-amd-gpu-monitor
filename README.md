@@ -15,7 +15,7 @@ Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRA
 - Three switchable popout visual styles:
   - `Default` — circular gauges
   - `Alternative` — stat cards and chips
-  - `Legacy` — compact text and progress barsimg.shields.io
+  - `Legacy` — compact text and progress bars
 - Multi-GPU widget variants — create separate widgets for GPU 0, GPU 1, and so on
 - Configurable via DankMaterialShell settings UI — no manual file editing required
 
