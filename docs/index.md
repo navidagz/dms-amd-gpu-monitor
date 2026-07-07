@@ -27,7 +27,7 @@ AMD GPU Monitor tracks:
 
 ## Screenshots
 
-![AMD GPU Monitor](../screenshots/screenshot.png)
+![AMD GPU Monitor](images/screenshot.png)
 
 ## Quick Links
 
