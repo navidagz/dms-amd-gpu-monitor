@@ -41,7 +41,7 @@ Column {
                 width: parent.parent.gaugeSize
                 height: parent.parent.gaugeSize
                 value: root.vramPercent / 100
-                label: (root.vramUsed / 1024).toFixed(1) + " GiB"
+                label: root.formatVram()
                 sublabel: "VRAM"
                 detail: root.vramPercent.toFixed(0) + "%"
                 accentColor: root.vramPercent > 90 ? Theme.error : (root.vramPercent > 70 ? Theme.warning : Theme.secondary)
