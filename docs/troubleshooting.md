@@ -58,7 +58,17 @@ Enable **Force Padding** in the plugin settings. This pads the widget to a fixed
 
 ### High CPU usage from the plugin
 
-Increase the `updateInterval` property in `AmdGpuMonitorWidget.qml` to reduce polling frequency. The default is 4000 ms (4 seconds); setting it to 8000 ms or higher will halve the overhead.
+Increase the **Update Interval** setting in the plugin settings UI to reduce polling frequency. The default is 4s; setting it to 8s or 15s will cut overhead significantly.
+
+### Widget icon turns red / stats stop updating
+
+The plugin surfaces a `statsError` state when `amdgpu_top` exits non-zero, writes to stderr, or produces output that fails to parse as JSON. The bar icon tints red as an indicator. Check:
+
+- `amdgpu_top -J -n 1` runs cleanly and produces valid JSON (see above)
+- The process isn't being killed mid-write by another tool (e.g. a competing monitor also polling `amdgpu_top`)
+- Permissions/group membership per "Permission issues" above
+
+The widget keeps its last-known values during a transient error instead of resetting to zero, so a single bad poll will self-heal on the next cycle once corrected.
 
 ### Popout panel is blank or fails to load
 

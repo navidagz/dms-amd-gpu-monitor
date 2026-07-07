@@ -9,10 +9,10 @@ title: Technical Details
 
 The plugin uses `amdgpu_top` with JSON output mode to gather GPU statistics:
 
-1. A `Timer` fires every `updateInterval` ms (default: 4000 ms)
-2. It launches `Process { command: ["amdgpu_top", "-J", "-n", "1"] }`
-3. A `StdioCollector` captures stdout; when the stream finishes the JSON is parsed inline in QML JavaScript
-4. State properties are updated and the UI re-renders reactively via QML bindings
+1. A `Timer` fires every `updateInterval` ms (default: 4000 ms, configurable in settings as 1s–15s)
+2. It launches `Process { command: ["amdgpu_top", "-J", "-n", "1"] }`, guarded so a new poll never starts while the previous one is still running
+3. A `StdioCollector` captures stdout; when the stream finishes the JSON is parsed inside a `try`/`catch`. Parse failures, non-zero exit codes, and stderr output all set a `statsError` flag (shown as a red-tinted bar icon) without resetting existing values
+4. State properties are updated and the UI re-renders reactively via QML bindings; the process list is only reassigned when its contents actually changed, avoiding needless list-view churn
 
 ## Data Fields
 

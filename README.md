@@ -96,6 +96,8 @@ Available in the DMS settings UI:
   Keeps the horizontal bar width stable as values change.
 - `Popout Style`
   Switches between `Default`, `Alternative`, and `Legacy`.
+- `Update Interval`
+  Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU.
 - `Process List Height`
   Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range.
 - `GPU Variants`

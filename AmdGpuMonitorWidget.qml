@@ -28,7 +28,7 @@ PluginComponent {
     property real memUsage: 0.0
     property real mediaUsage: 0.0
 
-    property int updateInterval: 4000
+    property int updateInterval: Math.max(1000, parseInt(variantData?.updateInterval ?? pluginData.updateInterval ?? "4000") || 4000)
     property string temperatureSysfsPath: ""
 
     property bool minimumWidth: variantData?.minimumWidth ?? pluginData.minimumWidth ?? true

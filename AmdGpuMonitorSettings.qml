@@ -56,6 +56,20 @@ PluginSettings {
         defaultValue: "default"
     }
 
+    SelectionSetting {
+        settingKey: "updateInterval"
+        label: "Update Interval"
+        description: "How often amdgpu_top is polled. Lower values are more responsive but use more CPU."
+        options: [
+            { label: "1s", value: "1000" },
+            { label: "2s", value: "2000" },
+            { label: "4s", value: "4000" },
+            { label: "8s", value: "8000" },
+            { label: "15s", value: "15000" }
+        ]
+        defaultValue: "4000"
+    }
+
     StringSetting {
         settingKey: "processListHeight"
         label: "Process List Height (px)"

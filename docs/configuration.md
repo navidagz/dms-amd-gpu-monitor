@@ -43,38 +43,41 @@ Controls the visual style of the popout panel when you click the bar widget.
 
 Sets the maximum height of the GPU process list in the popout panel.
 
+### Update Interval (`updateInterval`)
+
+| | |
+|---|---|
+| **Type** | Selection |
+| **Default** | `4000` ms |
+| **Options** | 1s, 2s, 4s, 8s, 15s |
+
+Controls how often `amdgpu_top` is polled. Lower values are more responsive but use more CPU; higher values reduce polling overhead.
+
 ---
 
 ## Advanced Configuration
 
-The following require editing `AmdGpuMonitorWidget.qml` directly.
-
-### Update Interval
-
-Controls how often `amdgpu_top` is polled. Default is 4000 ms (4 seconds).
-
-```qml
-property int updateInterval: 4000
-```
-
-Increasing this value reduces CPU overhead from polling. Decreasing it gives more frequent updates.
-
 ### Usage Color Thresholds
 
+Usage and temperature color thresholds are centralized in `components/shared/CommonStyles.qml`:
+
 ```qml
-function getUsageColor(percent) {
-    if (percent > 90) return Theme.error;   // Critical — red
-    if (percent > 70) return "#ffa500";     // Warning — orange
-    return Theme.primary;                    // Normal
+readonly property real usageWarningThreshold: 70
+readonly property real usageCriticalThreshold: 90
+readonly property real temperatureWarningThreshold: 70
+readonly property real temperatureCriticalThreshold: 85
+
+function usageColor(percent) {
+    if (percent > usageCriticalThreshold) return Theme.error;
+    if (percent > usageWarningThreshold) return Theme.warning;
+    return Theme.primary;
+}
+
+function temperatureColor(temperature) {
+    if (temperature > temperatureCriticalThreshold) return Theme.error;
+    if (temperature > temperatureWarningThreshold) return Theme.warning;
+    return Theme.info;
 }
 ```
 
-### Temperature Warning Threshold
-
-In `LegacyStyle.qml` and `AltStyle.qml`, temperature turns red above 80°C:
-
-```qml
-color: root.temperature > 80 ? Theme.error : Theme.surfaceText
-```
-
-In `DefaultStyle.qml` (circle gauges), the gauge color changes at 70°C (warning) and 85°C (critical).
+All three popout styles (`Default`, `Alternative`, `Legacy`) read these same thresholds, so editing this one file changes coloring everywhere consistently.
