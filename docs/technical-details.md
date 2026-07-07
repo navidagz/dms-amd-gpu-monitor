@@ -42,6 +42,12 @@ Display auto-scales: if total < 1024 MiB, values are shown in MiB; otherwise the
 | `temperature` | `gpu_metrics.temperature_edge` | Edge temperature (°C) |
 | `powerUsage` | `Sensors["Average Power"].value` | Average power draw (W) |
 
+### Error State
+
+| Field | Set when | Description |
+|---|---|---|
+| `statsError` | `amdgpu_top` exits non-zero, writes to stderr, or its stdout fails `JSON.parse` | Drives the red bar-icon tint; last-known values are kept, not reset |
+
 ### Per-Process Metrics (fdinfo)
 
 Only processes where `vram > 0 || gfx > 0` are included. The list is sorted by VRAM descending.
@@ -58,15 +64,21 @@ Requires Linux kernel 5.14+ and AMDGPU driver with fdinfo support.
 
 ## Color Coding
 
+Usage and temperature thresholds are centralized in `components/shared/CommonStyles.qml` and shared by all three popout styles:
+
 | Range | Color | Meaning |
 |---|---|---|
 | < 70% | `Theme.primary` | Normal |
-| 70–90% | `#ffa500` (orange) | Warning |
-| > 90% | `Theme.error` (red) | Critical |
+| 70–90% | `Theme.warning` | Warning |
+| > 90% | `Theme.error` | Critical |
 
-Temperature thresholds differ slightly by style:
-- **Default style (gauges):** warning at 70°C, critical at 85°C
-- **Alt and Legacy styles:** critical at 80°C
+| Temperature | Color | Meaning |
+|---|---|---|
+| < 70°C | `Theme.info` | Normal |
+| 70–85°C | `Theme.warning` | Warning |
+| > 85°C | `Theme.error` | Critical |
+
+All popout styles (Default, Alternative, Legacy) read the same thresholds, so changing `CommonStyles.qml` updates coloring everywhere consistently.
 
 ## Popout Visual Styles
 
@@ -84,7 +96,7 @@ Temperature thresholds differ slightly by style:
 | `components/shared/EngineBar.qml` | Label + animated horizontal bar + percentage; used for GFX/Memory/Media rows |
 | `components/shared/ProgressBar.qml` | Generic animated fill bar; configurable height, radius, colors |
 | `components/shared/StatCard.qml` | Rounded card with icon, label, large bold value, and a thin progress bar |
-| `components/shared/CommonStyles.qml` | Shared layout constants (`largePanelRadius: 16`, `mediumPanelRadius: 12`, `chipHeight: 48`, etc.) |
+| `components/shared/CommonStyles.qml` | Shared layout constants (`largePanelRadius: 16`, `mediumPanelRadius: 12`, `chipHeight: 48`, etc.) plus the shared usage/temperature color thresholds and `usageColor()`/`temperatureColor()` helpers |
 
 ## Animations
 
@@ -96,7 +108,7 @@ Temperature thresholds differ slightly by style:
 | Key | Value |
 |---|---|
 | `id` | `amdGpuMonitor` |
-| `version` | `2.0.0` |
+| `version` | `3.1.0` |
 | `capabilities` | `dankbar-widget`, `monitoring` |
 | `permissions` | `settings_read`, `settings_write`, `process` |
 | `requires` | `amdgpu_top` |

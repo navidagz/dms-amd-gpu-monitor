@@ -43,6 +43,17 @@ Controls the visual style of the popout panel when you click the bar widget.
 
 Sets the maximum height of the GPU process list in the popout panel.
 
+### GPU Variants
+
+Below the settings above, the plugin settings UI has a **GPU Variants** section for multi-GPU systems:
+
+1. Enter a **Variant Name** (e.g. `iGPU`) and a **GPU Index** (zero-based, matching `amdgpu_top`'s device order).
+2. Click **Create GPU Variant**. The variant is stored with its own `gpuIndex`, `description`, and `icon`.
+3. Go to **Add Widget** in the bar configuration and add the new variant — it behaves as an independent widget instance targeting that GPU.
+4. Existing variants are listed below the creator with a delete button per entry.
+
+The base widget (no variant) always defaults to GPU index `0`.
+
 ### Update Interval (`updateInterval`)
 
 | | |
@@ -81,3 +92,7 @@ function temperatureColor(temperature) {
 ```
 
 All three popout styles (`Default`, `Alternative`, `Legacy`) read these same thresholds, so editing this one file changes coloring everywhere consistently.
+
+## Error Indication
+
+If the bar widget's icon tints red, `amdgpu_top` failed on the last poll (non-zero exit, stderr output, or invalid JSON). See [Troubleshooting: Widget icon turns red](troubleshooting#widget-icon-turns-red--stats-stop-updating) for diagnosis steps. The widget keeps its last-known values during a transient failure.
