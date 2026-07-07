@@ -20,6 +20,7 @@ PluginComponent {
     property int powerUsage: 0
     property string gpuName: "AMD GPU"
     property var processes: []
+    property bool statsError: false
 
     property real gfxUsage: 0.0
     property real memUsage: 0.0
@@ -73,10 +74,36 @@ PluginComponent {
         command: ["amdgpu_top", "-J", "-n", "1"]
         running: false
 
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                root.statsError = true;
+                console.warn(`amdGpuMonitor: amdgpu_top exited with code ${exitCode}`);
+            }
+        }
+
+        stderr: StdioCollector {
+            onStreamFinished: {
+                const errorText = text.trim();
+                if (errorText.length > 0) {
+                    root.statsError = true;
+                    console.warn(`amdGpuMonitor: ${errorText}`);
+                }
+            }
+        }
+
         stdout: StdioCollector {
             onStreamFinished: {
                 const output = text.trim();
-                const data = JSON.parse(output);
+                let data;
+                try {
+                    data = JSON.parse(output);
+                } catch (e) {
+                    root.statsError = true;
+                    console.warn(`amdGpuMonitor: failed to parse amdgpu_top output: ${e}`);
+                    return;
+                }
+
+                root.statsError = false;
                 const devices = Array.isArray(data.devices) ? data.devices : [];
                 const selectedGpu = devices[root.gpuIndex] || devices[0];
 
@@ -262,7 +289,7 @@ PluginComponent {
             DankIcon {
                 name: "shadow"
                 size: root.iconSize
-                color: Theme.widgetIconColor
+                color: root.statsError ? Theme.error : Theme.widgetIconColor
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -315,7 +342,7 @@ PluginComponent {
             DankIcon {
                 name: "shadow"
                 size: root.iconSize
-                color: Theme.widgetIconColor
+                color: root.statsError ? Theme.error : Theme.widgetIconColor
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
