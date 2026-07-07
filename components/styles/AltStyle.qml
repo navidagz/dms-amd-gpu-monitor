@@ -50,7 +50,7 @@ Column {
             width: (parent.width - Theme.spacingS) / 2
             height: commonStyles.chipHeight
             radius: commonStyles.mediumPanelRadius
-            color: root.temperature > 80 ? Theme.errorHover : Theme.surfaceContainerHigh
+            color: root.temperature > commonStyles.temperatureCriticalThreshold ? Theme.errorHover : Theme.surfaceContainerHigh
 
             Row {
                 anchors.centerIn: parent
@@ -59,13 +59,13 @@ Column {
                 DankIcon {
                     name: "thermostat"
                     size: 22
-                    color: root.temperature > 80 ? Theme.error : Theme.secondary
+                    color: root.temperature > commonStyles.temperatureCriticalThreshold ? Theme.error : Theme.secondary
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 StyledText {
                     text: `${root.temperature}°C`
-                    color: root.temperature > 80 ? Theme.error : Theme.surfaceText
+                    color: root.temperature > commonStyles.temperatureCriticalThreshold ? Theme.error : Theme.surfaceText
                     font.pixelSize: Theme.fontSizeMedium
                     font.weight: Font.Bold
                     anchors.verticalCenter: parent.verticalCenter

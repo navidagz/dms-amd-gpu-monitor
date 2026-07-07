@@ -128,7 +128,7 @@ Column {
 
             StyledText {
                 text: `${root.temperature}°C`
-                color: root.temperature > 80 ? Theme.error : Theme.surfaceText
+                color: root.temperature > commonStyles.temperatureCriticalThreshold ? Theme.error : Theme.surfaceText
                 font.pixelSize: Theme.fontSizeLarge
                 font.bold: true
             }

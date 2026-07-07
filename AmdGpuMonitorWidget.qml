@@ -6,6 +6,8 @@ import qs.Common
 import qs.Widgets
 import qs.Modules.Plugins
 
+import "components/shared" as Shared
+
 PluginComponent {
     id: root
 
@@ -42,6 +44,10 @@ PluginComponent {
             default:
                 return "components/styles/DefaultStyle.qml";
         }
+    }
+
+    Shared.CommonStyles {
+        id: commonStyles
     }
 
     Timer {
@@ -306,9 +312,7 @@ PluginComponent {
     }
 
     function getUsageColor(percent) {
-        if (percent > 90) return Theme.error;
-        if (percent > 70) return "#ffa500";
-        return Theme.primary;
+        return commonStyles.usageColor(percent);
     }
 
     horizontalBarPill: Component {
