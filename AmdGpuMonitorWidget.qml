@@ -192,12 +192,19 @@ PluginComponent {
                     });
 
                     processList.sort((a, b) => b.vram - a.vram);
-                    root.processes = processList;
-                } else {
+                    if (!root.processListsEqual(root.processes, processList))
+                        root.processes = processList;
+                } else if (root.processes.length > 0) {
                     root.processes = [];
                 }
             }
         }
+    }
+
+    function processListsEqual(a, b) {
+        if (a.length !== b.length)
+            return false;
+        return JSON.stringify(a) === JSON.stringify(b);
     }
 
     function formatVram() {
