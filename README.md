@@ -1,5 +1,13 @@
 # AMD GPU Monitor
 
+<br>
+<div align="center">
+  <a href="https://github.com/AvengeMedia/dms-plugin-registry/issues/490">
+    <img src="https://img.shields.io/badge/UPVOTE_THIS-👍-informational?style=for-the-badge" alt="Upvote this plugin" width="200"/>
+  </a>
+</div>
+<br>
+
 Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRAM, temperature, power, and per-process activity for AMD GPUs, with support for multiple GPU-specific widget variants.
 
 ![Screenshot](screenshots/screenshot.png)
@@ -21,12 +29,27 @@ Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRA
 
 ## Quick Start
 
-**Requirements:** AMD GPU with AMDGPU driver, `amdgpu_top`, QuickShell, DankMaterialShell, Linux kernel 5.14+ (for per-process stats)
+### Requirements 
+- AMD GPU
+- [`amdgpu_top`](https://github.com/Umio-Yasuno/amdgpu_top)
+- QuickShell
+- DankMaterialShell
+- Linux kernel 5.14+ (for per-process stats)
 
+#### Install `amdgpu_top`
 ```bash
-# Install amdgpu_top (Arch)
+# From source
+cargo install amdgpu_top
+
+# Nix profile
+nix profile add nixpkgs#amdgpu_top
+
+# Arch
 yay -S amdgpu_top
 ```
+**Or** release page: https://github.com/Umio-Yasuno/amdgpu_top/releases
+
+### Installation
 
 Install the plugin via the DankMaterialShell plugin store, or manually:
 
@@ -59,13 +82,17 @@ Then:
 
 The popout style is controlled in the plugin settings under **Popout Style**:
 
-- `Default` — circular gauges for GPU, VRAM, and temperature
-- `Alternative` — stat-card layout with chip-style temperature and power indicators
-- `Legacy` — classic text layout with horizontal progress bars
+| Style | Description |
+|---|---|
+| `Default` | Circular gauges for GPU, VRAM, and temperature |
+| `Alternative` | Stat-card layout with chip-style temperature and power indicators |
+| `Legacy` | Classic text layout with horizontal progress bars |
 
 You can switch styles at runtime from the DMS plugin settings UI.
 
 ### Multi-GPU Variants
+
+<img src="https://github.com/user-attachments/assets/acf694fb-e2a4-4622-9fa6-b29f462da538" align="right" width="400">
 
 This plugin now supports per-GPU widget variants through the DMS variant system.
 
@@ -77,8 +104,6 @@ Use this when you want:
 
 To create a GPU-specific widget:
 
-![gpu-variant](screenshots/gpu-variant.png)
-
 1. Open DMS Settings -> Plugins -> AMD GPU Monitor
 2. Scroll to **GPU Variants**
 3. Enter a variant name such as `GPU 0` or `iGPU`
@@ -88,20 +113,19 @@ To create a GPU-specific widget:
 
 Each created variant stores its own `gpuIndex`, so multiple AMD GPU Monitor widgets can show different GPUs at the same time.
 
+<br clear="right"/>
+
 ## Settings
 
 Available in the DMS settings UI:
 
-- `Force Padding`
-  Keeps the horizontal bar width stable as values change.
-- `Popout Style`
-  Switches between `Default`, `Alternative`, and `Legacy`.
-- `Update Interval`
-  Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU.
-- `Process List Height`
-  Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range.
-- `GPU Variants`
-  Creates and manages GPU-specific widget variants for multi-GPU systems.
+| Setting | Description |
+|---|---|
+| `Force Padding` | Keeps the horizontal bar width stable as values change. |
+| `Popout Style` | Switches between `Default`, `Alternative`, and `Legacy`. |
+| `Update Interval` | Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU. |
+| `Process List Height` | Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range. |
+| `GPU Variants` | Creates and manages GPU-specific widget variants for multi-GPU systems. |
 
 ## Notes
 
