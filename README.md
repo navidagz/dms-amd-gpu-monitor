@@ -57,7 +57,7 @@ yay -S amdgpu_top
 Install the plugin via the DankMaterialShell  <a href="dms://plugin/install/amdGpuMonitor">plugin store</a>, or manually:
 
 ```bash
-cp -r AmdGpuMonitor ~/.config/DankMaterialShell/plugins/
+git clone https://github.com/navidagz/dms-amd-gpu-monitor.git ~/.config/DankMaterialShell/plugins/amdGpuMonitor
 ```
 
 Then:
