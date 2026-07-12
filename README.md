@@ -29,7 +29,8 @@ Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRA
 
 ## Quick Start
 
-### Requirements 
+### Requirements
+
 - AMD GPU
 - [`amdgpu_top`](https://github.com/Umio-Yasuno/amdgpu_top)
 - QuickShell
@@ -37,6 +38,7 @@ Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRA
 - Linux kernel 5.14+ (for per-process stats)
 
 #### Install `amdgpu_top`
+
 ```bash
 # From source
 cargo install amdgpu_top
@@ -47,11 +49,12 @@ nix profile add nixpkgs#amdgpu_top
 # Arch
 yay -S amdgpu_top
 ```
-**Or** release page: https://github.com/Umio-Yasuno/amdgpu_top/releases
+
+**Or** release page: <https://github.com/Umio-Yasuno/amdgpu_top/releases>
 
 ### Installation
 
-Install the plugin via the DankMaterialShell plugin store, or manually:
+Install the plugin via the DankMaterialShell [plugin store](dms://plugin/install/amdGpuMonitor), or manually:
 
 ```bash
 cp -r AmdGpuMonitor ~/.config/DankMaterialShell/plugins/
