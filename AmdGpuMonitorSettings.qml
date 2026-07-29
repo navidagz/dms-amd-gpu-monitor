@@ -9,23 +9,35 @@ PluginSettings {
     id: root
     pluginId: "amdGpuMonitor"
 
-    // [{ name, pci, suspended }] as reported by amdgpu_top
+    // [{ name, pci, type, suspended }] as reported by amdgpu_top
     property var detectedGpus: []
     property string detectError: ""
-    readonly property var gpuLabels: detectedGpus.map(g => g.suspended ? `${g.name} (suspended)` : g.name)
-    property string selectedGpuLabel: ""
 
-    function refreshVariants() {
-        variantsModel.clear();
-        for (let i = 0; i < variants.length; i++) {
-            variantsModel.append(variants[i]);
+    function variantDescription(gpu) {
+        const kind = gpu.type === "APU" ? "Integrated" : gpu.type === "dGPU" ? "Discrete" : "";
+        return kind ? `Monitor your ${kind.toLowerCase()} ${gpu.name}` : `Monitor your ${gpu.name}`;
+    }
+
+    // Matched by PCI so a GPU that suspends and returns keeps its existing widget.
+    function syncVariantsToGpus() {
+        for (const gpu of detectedGpus) {
+            const config = {
+                gpuPci: gpu.pci,
+                description: variantDescription(gpu),
+                icon: "memory"
+            };
+            const existing = (variants || []).find(v => v.gpuPci === gpu.pci);
+            if (!existing) {
+                createVariant(gpu.name, config);
+            } else if (existing.name !== gpu.name || existing.description !== config.description) {
+                updateVariant(existing.id, Object.assign({ name: gpu.name }, config));
+            }
         }
     }
 
-    onVariantsChanged: refreshVariants()
+    onDetectedGpusChanged: syncVariantsToGpus()
 
     Component.onCompleted: {
-        refreshVariants();
         detectGpusProcess.running = true;
     }
 
@@ -52,12 +64,14 @@ PluginSettings {
                 const active = (data.devices || []).map(d => ({
                     name: d["Info"]?.["DeviceName"] || "AMD GPU",
                     pci: d["Info"]?.["PCI"] || "",
+                    type: d["Info"]?.["GPU Type"] || "",
                     suspended: false
                 }));
                 // Suspended GPUs are listed separately and use flat keys.
                 const asleep = (data.suspended_devices || []).map(d => ({
                     name: d.DeviceName || "AMD GPU",
                     pci: d.pci || "",
+                    type: "",
                     suspended: true
                 }));
 
@@ -65,8 +79,6 @@ PluginSettings {
                 all.sort((a, b) => a.pci.localeCompare(b.pci));
                 root.detectedGpus = all;
                 root.detectError = all.length ? "" : "No AMD GPUs detected.";
-                if (all.length && !root.selectedGpuLabel)
-                    root.selectedGpuLabel = root.gpuLabels[0];
             }
         }
     }
@@ -137,7 +149,7 @@ PluginSettings {
 
     StyledText {
         width: parent.width
-        text: "GPU Variants"
+        text: "Your GPUs"
         font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
         color: Theme.surfaceText
@@ -145,7 +157,7 @@ PluginSettings {
 
     StyledText {
         width: parent.width
-        text: "Create per-GPU widget variants. Each variant appears as a separate widget in Add Widget and targets a detected GPU."
+        text: "Each detected GPU gets its own widget automatically. Add them from Add Widget in the Dank Bar settings."
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
         wrapMode: Text.WordWrap
@@ -153,136 +165,50 @@ PluginSettings {
 
     Rectangle {
         width: parent.width
-        height: variantCreator.implicitHeight + Theme.spacingM * 2
+        height: gpuListColumn.implicitHeight + Theme.spacingM * 2
         radius: Theme.cornerRadius
         color: Theme.surfaceContainerHigh
 
         Column {
-            id: variantCreator
-            anchors.fill: parent
-            anchors.margins: Theme.spacingM
-            spacing: Theme.spacingM
-
-            Row {
-                width: parent.width
-                spacing: Theme.spacingM
-
-                Column {
-                    width: (parent.width - Theme.spacingM) / 2
-                    spacing: Theme.spacingXS
-
-                    StyledText {
-                        text: "Variant Name"
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.surfaceVariantText
-                    }
-
-                    DankTextField {
-                        id: variantNameField
-                        width: parent.width
-                        placeholderText: "GPU 1"
-                    }
-                }
-
-                Column {
-                    width: (parent.width - Theme.spacingM) / 2
-                    spacing: Theme.spacingXS
-
-                    StyledText {
-                        text: "GPU"
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.surfaceVariantText
-                    }
-
-                    DankDropdown {
-                        width: parent.width
-                        options: root.gpuLabels
-                        currentValue: root.selectedGpuLabel
-                        emptyText: "No GPUs detected"
-                        onValueChanged: value => root.selectedGpuLabel = value
-                    }
-                }
-            }
-
-            StyledText {
-                width: parent.width
-                text: root.detectError
-                visible: root.detectError !== ""
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.error
-                wrapMode: Text.WordWrap
-            }
-
-            DankButton {
-                text: "Create GPU Variant"
-                iconName: "add"
-                enabled: root.detectedGpus.length > 0
-                onClicked: {
-                    const gpu = root.detectedGpus[root.gpuLabels.indexOf(root.selectedGpuLabel)];
-                    if (!gpu) {
-                        ToastService.showError("Select a GPU");
-                        return;
-                    }
-
-                    const variantName = variantNameField.text.trim() || gpu.name;
-                    createVariant(variantName, {
-                        gpuPci: gpu.pci,
-                        description: `AMD GPU Monitor for ${gpu.name}`,
-                        icon: "memory"
-                    });
-                    variantNameField.text = "";
-                    ToastService.showInfo(`Created variant: ${variantName}`);
-                }
-            }
-        }
-    }
-
-    Rectangle {
-        width: parent.width
-        height: variantsListColumn.implicitHeight + Theme.spacingM * 2
-        radius: Theme.cornerRadius
-        color: Theme.surfaceContainerHigh
-
-        Column {
-            id: variantsListColumn
+            id: gpuListColumn
             anchors.fill: parent
             anchors.margins: Theme.spacingM
             spacing: Theme.spacingS
 
-            StyledText {
-                width: parent.width
-                text: "Existing Variants"
-                font.pixelSize: Theme.fontSizeMedium
-                font.weight: Font.Medium
-                color: Theme.surfaceText
-            }
-
             Repeater {
-                model: variantsModel
+                model: root.detectedGpus
 
                 Rectangle {
                     required property var modelData
 
                     width: parent.width
-                    height: variantRow.implicitHeight + Theme.spacingM * 2
+                    height: gpuRow.implicitHeight + Theme.spacingM * 2
                     radius: Theme.cornerRadius
                     color: Theme.surfaceContainer
 
                     Row {
                         anchors.fill: parent
                         anchors.leftMargin: Theme.spacingM
-                        anchors.rightMargin: Theme.spacingS
-                        spacing: Theme.spacingS
+                        anchors.rightMargin: Theme.spacingM
+                        spacing: Theme.spacingM
+
+                        DankIcon {
+                            id: gpuIcon
+                            name: "memory"
+                            size: 20
+                            color: Theme.surfaceVariantText
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
 
                         Column {
-                            id: variantRow
-                            width: parent.width - deleteVariantButton.width - Theme.spacingS
+                            id: gpuRow
+                            width: parent.width - gpuIcon.width - Theme.spacingM * 2
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: Theme.spacingXS
 
                             StyledText {
                                 width: parent.width
-                                text: modelData.name || "Unnamed"
+                                text: modelData.name
                                 font.pixelSize: Theme.fontSizeSmall
                                 font.weight: Font.Medium
                                 color: Theme.surfaceText
@@ -291,37 +217,10 @@ PluginSettings {
 
                             StyledText {
                                 width: parent.width
-                                text: `${modelData.gpuPci || `GPU ${modelData.gpuIndex ?? 0}`} • ${modelData.fullId || modelData.id || ""}`
+                                text: modelData.suspended ? `${modelData.pci} (suspended)` : modelData.pci
                                 font.pixelSize: Theme.fontSizeSmall - 1
                                 color: Theme.surfaceVariantText
                                 elide: Text.ElideRight
-                            }
-                        }
-
-                        Rectangle {
-                            id: deleteVariantButton
-                            width: 28
-                            height: 28
-                            radius: 14
-                            color: deleteVariantArea.containsMouse ? Theme.error : "transparent"
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            DankIcon {
-                                anchors.centerIn: parent
-                                name: "delete"
-                                size: 16
-                                color: deleteVariantArea.containsMouse ? Theme.onError : Theme.surfaceVariantText
-                            }
-
-                            MouseArea {
-                                id: deleteVariantArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    removeVariant(modelData.id);
-                                    ToastService.showInfo(`Removed variant: ${modelData.name || modelData.id}`);
-                                }
                             }
                         }
                     }
@@ -330,10 +229,11 @@ PluginSettings {
 
             StyledText {
                 width: parent.width
-                visible: variantsModel.count === 0
-                text: "No GPU variants yet."
+                visible: root.detectError !== ""
+                text: root.detectError
                 font.pixelSize: Theme.fontSizeSmall
-                color: Theme.surfaceVariantText
+                color: Theme.error
+                wrapMode: Text.WordWrap
             }
         }
     }

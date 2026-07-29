@@ -49,7 +49,7 @@ PluginComponent {
     property bool minimumWidth: variantData?.minimumWidth ?? pluginData.minimumWidth ?? true
     property int gpuIndex: Math.max(0, parseInt(variantData?.gpuIndex ?? "0") || 0)
     // amdgpu_top drops runtime-suspended GPUs from `devices`, so positions shift.
-    // Match on PCI address instead; index is only a fallback for older variants.
+    // gpuIndex is kept only as a fallback for variants created before this.
     property string gpuPci: (variantData?.gpuPci ?? "").toString()
     property string popoutStyle: variantData?.popoutStyle ?? pluginData.popoutStyle ?? "default"
     property int processListHeight: Math.max(100, Math.min(750, parseInt(variantData?.processListHeight ?? pluginData.processListHeight ?? "250") || 250))
