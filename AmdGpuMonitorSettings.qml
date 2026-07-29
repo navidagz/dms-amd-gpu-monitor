@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Io
 import qs.Common
 import qs.Modules.Plugins
 import qs.Services
@@ -7,6 +8,12 @@ import qs.Widgets
 PluginSettings {
     id: root
     pluginId: "amdGpuMonitor"
+
+    // [{ name, pci, suspended }] as reported by amdgpu_top
+    property var detectedGpus: []
+    property string detectError: ""
+    readonly property var gpuLabels: detectedGpus.map(g => g.suspended ? `${g.name} (suspended)` : g.name)
+    property string selectedGpuLabel: ""
 
     function refreshVariants() {
         variantsModel.clear();
@@ -19,6 +26,49 @@ PluginSettings {
 
     Component.onCompleted: {
         refreshVariants();
+        detectGpusProcess.running = true;
+    }
+
+    Process {
+        id: detectGpusProcess
+        command: ["amdgpu_top", "-J", "-n", "1"]
+        running: false
+
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                root.detectError = "Could not run amdgpu_top. Is it installed?";
+        }
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let data;
+                try {
+                    data = JSON.parse(text.trim());
+                } catch (e) {
+                    root.detectError = "Could not parse amdgpu_top output.";
+                    return;
+                }
+
+                const active = (data.devices || []).map(d => ({
+                    name: d["Info"]?.["DeviceName"] || "AMD GPU",
+                    pci: d["Info"]?.["PCI"] || "",
+                    suspended: false
+                }));
+                // Suspended GPUs are listed separately and use flat keys.
+                const asleep = (data.suspended_devices || []).map(d => ({
+                    name: d.DeviceName || "AMD GPU",
+                    pci: d.pci || "",
+                    suspended: true
+                }));
+
+                const all = active.concat(asleep).filter(g => g.pci);
+                all.sort((a, b) => a.pci.localeCompare(b.pci));
+                root.detectedGpus = all;
+                root.detectError = all.length ? "" : "No AMD GPUs detected.";
+                if (all.length && !root.selectedGpuLabel)
+                    root.selectedGpuLabel = root.gpuLabels[0];
+            }
+        }
     }
 
     StyledText {
@@ -95,7 +145,7 @@ PluginSettings {
 
     StyledText {
         width: parent.width
-        text: "Create per-GPU widget variants. Each variant appears as a separate widget in Add Widget and can target a different GPU index."
+        text: "Create per-GPU widget variants. Each variant appears as a separate widget in Add Widget and targets a detected GPU."
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
         wrapMode: Text.WordWrap
@@ -139,38 +189,48 @@ PluginSettings {
                     spacing: Theme.spacingXS
 
                     StyledText {
-                        text: "GPU Index"
+                        text: "GPU"
                         font.pixelSize: Theme.fontSizeSmall
                         color: Theme.surfaceVariantText
                     }
 
-                    DankTextField {
-                        id: variantGpuIndexField
+                    DankDropdown {
                         width: parent.width
-                        placeholderText: "1"
+                        options: root.gpuLabels
+                        currentValue: root.selectedGpuLabel
+                        emptyText: "No GPUs detected"
+                        onValueChanged: value => root.selectedGpuLabel = value
                     }
                 }
+            }
+
+            StyledText {
+                width: parent.width
+                text: root.detectError
+                visible: root.detectError !== ""
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.error
+                wrapMode: Text.WordWrap
             }
 
             DankButton {
                 text: "Create GPU Variant"
                 iconName: "add"
+                enabled: root.detectedGpus.length > 0
                 onClicked: {
-                    const rawIndex = variantGpuIndexField.text.trim();
-                    const parsedIndex = parseInt(rawIndex);
-                    if (rawIndex === "" || isNaN(parsedIndex) || parsedIndex < 0) {
-                        ToastService.showError("Enter a valid GPU index");
+                    const gpu = root.detectedGpus[root.gpuLabels.indexOf(root.selectedGpuLabel)];
+                    if (!gpu) {
+                        ToastService.showError("Select a GPU");
                         return;
                     }
 
-                    const variantName = variantNameField.text.trim() || `GPU ${parsedIndex}`;
+                    const variantName = variantNameField.text.trim() || gpu.name;
                     createVariant(variantName, {
-                        gpuIndex: parsedIndex,
-                        description: `AMD GPU Monitor for GPU ${parsedIndex}`,
+                        gpuPci: gpu.pci,
+                        description: `AMD GPU Monitor for ${gpu.name}`,
                         icon: "memory"
                     });
                     variantNameField.text = "";
-                    variantGpuIndexField.text = "";
                     ToastService.showInfo(`Created variant: ${variantName}`);
                 }
             }
@@ -231,7 +291,7 @@ PluginSettings {
 
                             StyledText {
                                 width: parent.width
-                                text: `GPU ${modelData.gpuIndex ?? 0} • ${modelData.fullId || modelData.id || ""}`
+                                text: `${modelData.gpuPci || `GPU ${modelData.gpuIndex ?? 0}`} • ${modelData.fullId || modelData.id || ""}`
                                 font.pixelSize: Theme.fontSizeSmall - 1
                                 color: Theme.surfaceVariantText
                                 elide: Text.ElideRight
