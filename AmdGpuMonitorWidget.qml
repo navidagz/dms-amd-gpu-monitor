@@ -23,16 +23,34 @@ PluginComponent {
     property string gpuName: "AMD GPU"
     property var processes: []
     property bool statsError: false
+    property bool gpuSuspended: false
 
     property real gfxUsage: 0.0
     property real memUsage: 0.0
     property real mediaUsage: 0.0
+
+    function resetStats() {
+        gfxUsage = 0.0;
+        memUsage = 0.0;
+        mediaUsage = 0.0;
+        gpuUsage = 0.0;
+        vramUsed = 0.0;
+        vramTotal = 0.0;
+        vramPercent = 0.0;
+        temperature = 0;
+        powerUsage = 0;
+        temperatureSysfsPath = "";
+        processes = [];
+    }
 
     property int updateInterval: Math.max(1000, parseInt(variantData?.updateInterval ?? pluginData.updateInterval ?? "4000") || 4000)
     property string temperatureSysfsPath: ""
 
     property bool minimumWidth: variantData?.minimumWidth ?? pluginData.minimumWidth ?? true
     property int gpuIndex: Math.max(0, parseInt(variantData?.gpuIndex ?? "0") || 0)
+    // amdgpu_top drops runtime-suspended GPUs from `devices`, so positions shift.
+    // Match on PCI address instead; index is only a fallback for older variants.
+    property string gpuPci: (variantData?.gpuPci ?? "").toString()
     property string popoutStyle: variantData?.popoutStyle ?? pluginData.popoutStyle ?? "default"
     property int processListHeight: Math.max(100, Math.min(750, parseInt(variantData?.processListHeight ?? pluginData.processListHeight ?? "250") || 250))
     readonly property string popoutStyleSource: {
@@ -133,21 +151,30 @@ PluginComponent {
 
                 root.statsError = false;
                 const devices = Array.isArray(data.devices) ? data.devices : [];
-                const selectedGpu = devices[root.gpuIndex] || devices[0];
+                const suspended = Array.isArray(data.suspended_devices) ? data.suspended_devices : [];
+
+                let selectedGpu = null;
+                if (root.gpuPci) {
+                    selectedGpu = devices.find(d => d["Info"]?.["PCI"] === root.gpuPci) || null;
+                    if (!selectedGpu) {
+                        // Configured GPU is powered down: report it idle rather than
+                        // silently falling through to whichever card is still awake.
+                        const naps = suspended.find(d => d.pci === root.gpuPci);
+                        if (naps) {
+                            root.resetStats();
+                            root.gpuName = naps.DeviceName || "AMD GPU";
+                            root.gpuSuspended = true;
+                            return;
+                        }
+                    }
+                } else {
+                    selectedGpu = devices[root.gpuIndex] || devices[0];
+                }
+                root.gpuSuspended = false;
 
                 if (!selectedGpu) {
+                    root.resetStats();
                     root.gpuName = "AMD GPU";
-                    root.gfxUsage = 0.0;
-                    root.memUsage = 0.0;
-                    root.mediaUsage = 0.0;
-                    root.gpuUsage = 0.0;
-                    root.vramUsed = 0.0;
-                    root.vramTotal = 0.0;
-                    root.vramPercent = 0.0;
-                    root.temperature = 0;
-                    root.powerUsage = 0;
-                    root.temperatureSysfsPath = "";
-                    root.processes = [];
                     return;
                 }
 
@@ -323,6 +350,7 @@ PluginComponent {
                 name: "shadow"
                 size: root.iconSize
                 color: root.statsError ? Theme.error : Theme.widgetIconColor
+                opacity: root.gpuSuspended ? 0.5 : 1.0
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -376,6 +404,7 @@ PluginComponent {
                 name: "shadow"
                 size: root.iconSize
                 color: root.statsError ? Theme.error : Theme.widgetIconColor
+                opacity: root.gpuSuspended ? 0.5 : 1.0
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
