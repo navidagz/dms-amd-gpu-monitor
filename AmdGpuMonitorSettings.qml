@@ -18,19 +18,54 @@ PluginSettings {
         return kind ? `Monitor your ${kind.toLowerCase()} ${gpu.name}` : `Monitor your ${gpu.name}`;
     }
 
+    // Pre-PCI variants only carry gpuIndex. Adopt them by position so the sync
+    // below doesn't duplicate them and orphan the originals. Returns the PCI
+    // addresses adopted, whose names came from the user and must not be reset.
+    function migrateLegacyVariants() {
+        const adopted = [];
+        const legacy = (variants || []).filter(v => !v.gpuPci && v.gpuIndex !== undefined);
+        if (legacy.length === 0)
+            return adopted;
+
+        const claimed = (variants || []).map(v => v.gpuPci).filter(pci => pci);
+        for (const variant of legacy) {
+            const gpu = detectedGpus[variant.gpuIndex];
+            if (!gpu || claimed.indexOf(gpu.pci) !== -1)
+                continue;
+            claimed.push(gpu.pci);
+            adopted.push(gpu.pci);
+            updateVariant(variant.id, {
+                gpuPci: gpu.pci,
+                gpuType: gpu.type || "",
+                description: variantDescription(gpu),
+                icon: variant.icon || "memory"
+            });
+        }
+        return adopted;
+    }
+
     // Matched by PCI so a GPU that suspends and returns keeps its existing widget.
     function syncVariantsToGpus() {
+        const adopted = migrateLegacyVariants();
+
         for (const gpu of detectedGpus) {
+            const existing = (variants || []).find(v => v.gpuPci === gpu.pci);
+            // Never clear a remembered type with the empty one a suspended
+            // device reports.
+            const gpuType = gpu.type || existing?.gpuType || "";
+            const name = adopted.indexOf(gpu.pci) !== -1 ? existing.name : gpu.name;
             const config = {
                 gpuPci: gpu.pci,
-                description: variantDescription(gpu),
+                gpuType: gpuType,
+                description: variantDescription({ name: gpu.name, type: gpuType }),
                 icon: "memory"
             };
-            const existing = (variants || []).find(v => v.gpuPci === gpu.pci);
             if (!existing) {
                 createVariant(gpu.name, config);
-            } else if (existing.name !== gpu.name || existing.description !== config.description) {
-                updateVariant(existing.id, Object.assign({ name: gpu.name }, config));
+            } else if (existing.name !== name
+                       || existing.description !== config.description
+                       || existing.gpuType !== gpuType) {
+                updateVariant(existing.id, Object.assign({ name: name }, config));
             }
         }
     }
@@ -67,7 +102,9 @@ PluginSettings {
                     type: d["Info"]?.["GPU Type"] || "",
                     suspended: false
                 }));
-                // Suspended GPUs are listed separately and use flat keys.
+                // Suspended devices serialize from DevicePath, which has no
+                // "GPU Type": reading it needs the device open. Resolved from
+                // the variant in syncVariantsToGpus instead.
                 const asleep = (data.suspended_devices || []).map(d => ({
                     name: d.DeviceName || "AMD GPU",
                     pci: d.pci || "",
@@ -234,6 +271,124 @@ PluginSettings {
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.error
                 wrapMode: Text.WordWrap
+            }
+        }
+    }
+
+    StyledText {
+        width: parent.width
+        text: "Configured Widgets"
+        font.pixelSize: Theme.fontSizeMedium
+        font.weight: Font.Medium
+        color: Theme.surfaceText
+    }
+
+    StyledText {
+        width: parent.width
+        text: "Widgets currently saved in your settings. Ones that no longer match a detected GPU can be removed here."
+        font.pixelSize: Theme.fontSizeSmall
+        color: Theme.surfaceVariantText
+        wrapMode: Text.WordWrap
+    }
+
+    Rectangle {
+        width: parent.width
+        height: variantsListColumn.implicitHeight + Theme.spacingM * 2
+        radius: Theme.cornerRadius
+        color: Theme.surfaceContainerHigh
+
+        Column {
+            id: variantsListColumn
+            anchors.fill: parent
+            anchors.margins: Theme.spacingM
+            spacing: Theme.spacingS
+
+            Repeater {
+                model: root.variants || []
+
+                Rectangle {
+                    id: variantEntry
+
+                    required property var modelData
+
+                    readonly property bool orphaned: !(root.detectedGpus || []).some(g => g.pci === variantEntry.modelData.gpuPci)
+
+                    width: parent.width
+                    height: variantRow.implicitHeight + Theme.spacingM * 2
+                    radius: Theme.cornerRadius
+                    color: Theme.surfaceContainer
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: Theme.spacingM
+                        anchors.rightMargin: Theme.spacingS
+                        spacing: Theme.spacingS
+
+                        Column {
+                            id: variantRow
+                            width: parent.width - deleteVariantButton.width - Theme.spacingS
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: Theme.spacingXS
+
+                            StyledText {
+                                width: parent.width
+                                text: variantEntry.modelData.name || "Unnamed"
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.weight: Font.Medium
+                                color: Theme.surfaceText
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                width: parent.width
+                                text: {
+                                    const variant = variantEntry.modelData;
+                                    const target = variant.gpuPci || (variant.gpuIndex !== undefined ? `GPU ${variant.gpuIndex}` : "unassigned");
+                                    return variantEntry.orphaned ? `${target} (not detected)` : target;
+                                }
+                                font.pixelSize: Theme.fontSizeSmall - 1
+                                color: variantEntry.orphaned ? Theme.error : Theme.surfaceVariantText
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        Rectangle {
+                            id: deleteVariantButton
+                            width: 28
+                            height: 28
+                            radius: 14
+                            color: deleteVariantArea.containsMouse ? Theme.error : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: "delete"
+                                size: 16
+                                color: deleteVariantArea.containsMouse ? Theme.onError : Theme.surfaceVariantText
+                            }
+
+                            MouseArea {
+                                id: deleteVariantArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    const variant = variantEntry.modelData;
+                                    root.removeVariant(variant.id);
+                                    ToastService.showInfo(`Removed widget: ${variant.name || variant.id}`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            StyledText {
+                width: parent.width
+                visible: (root.variants || []).length === 0
+                text: "No widgets configured yet."
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.surfaceVariantText
             }
         }
     }

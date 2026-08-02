@@ -30,6 +30,11 @@ PluginComponent {
     property real mediaUsage: 0.0
 
     function resetStats() {
+        // A sysfs read in flight would land on top of the cleared state and
+        // show a temperature for a GPU we just reported as idle.
+        if (updateTemperatureFallbackProcess.running)
+            updateTemperatureFallbackProcess.running = false;
+        temperatureFallbackTimeoutTimer.stop();
         gfxUsage = 0.0;
         memUsage = 0.0;
         mediaUsage = 0.0;
