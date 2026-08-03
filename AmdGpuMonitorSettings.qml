@@ -30,7 +30,7 @@ PluginSettings {
         const claimed = (variants || []).map(v => v.gpuPci).filter(pci => pci);
         for (const variant of legacy) {
             const gpu = detectedGpus[variant.gpuIndex];
-            if (!gpu || claimed.indexOf(gpu.pci) !== -1)
+            if (!gpu || !gpu.pci || claimed.indexOf(gpu.pci) !== -1)
                 continue;
             claimed.push(gpu.pci);
             adopted.push(gpu.pci);
@@ -285,7 +285,7 @@ PluginSettings {
 
     StyledText {
         width: parent.width
-        text: "Widgets currently saved in your settings. Ones that no longer match a detected GPU can be removed here."
+        text: "Widgets currently saved in your settings. Legacy items can be safely removed here (requires re-adding the widget to your bar)"
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
         wrapMode: Text.WordWrap
@@ -311,7 +311,7 @@ PluginSettings {
 
                     required property var modelData
 
-                    readonly property bool orphaned: !(root.detectedGpus || []).some(g => g.pci === variantEntry.modelData.gpuPci)
+                    readonly property bool legacy: !variantEntry.modelData.gpuPci && variantEntry.modelData.gpuIndex !== undefined
 
                     width: parent.width
                     height: variantRow.implicitHeight + Theme.spacingM * 2
@@ -344,10 +344,10 @@ PluginSettings {
                                 text: {
                                     const variant = variantEntry.modelData;
                                     const target = variant.gpuPci || (variant.gpuIndex !== undefined ? `GPU ${variant.gpuIndex}` : "unassigned");
-                                    return variantEntry.orphaned ? `${target} (not detected)` : target;
+                                    return variantEntry.legacy ? `${target} (legacy)` : target;
                                 }
                                 font.pixelSize: Theme.fontSizeSmall - 1
-                                color: variantEntry.orphaned ? Theme.error : Theme.surfaceVariantText
+                                color: variantEntry.legacy ? Theme.warning : Theme.surfaceVariantText
                                 elide: Text.ElideRight
                             }
                         }
