@@ -45,14 +45,25 @@ Sets the maximum height of the GPU process list in the popout panel.
 
 ### GPU Variants
 
-Below the settings above, the plugin settings UI has a **GPU Variants** section for multi-GPU systems:
+Below the settings above, the plugin settings UI has a **Your GPUs** / **Configured Widgets** section for multi-GPU systems.
 
-1. Enter a **Variant Name** (e.g. `iGPU`) and a **GPU Index** (zero-based, matching `amdgpu_top`'s device order).
-2. Click **Create GPU Variant**. The variant is stored with its own `gpuIndex`, `description`, and `icon`.
-3. Go to **Add Widget** in the bar configuration and add the new variant — it behaves as an independent widget instance targeting that GPU.
-4. Existing variants are listed below the creator with a delete button per entry.
+GPUs are discovered automatically using `amdgpu_top -J -n 1` and matched by PCI address, so you do not need to type a GPU index. Each detected GPU gets its own widget variant automatically:
 
-The base widget (no variant) always defaults to GPU index `0`.
+1. Open the AMD GPU Monitor plugin settings.
+2. Under **Configured Widgets**, each detected GPU already has a variant.
+3. Go to **Add Widget** in the bar configuration and add the variant you want — it behaves as an independent widget instance targeting that GPU.
+
+![GPU auto-detection and variant editing](images/settings.png)
+
+#### Editing a variant
+
+Click the pencil icon on a configured widget to change its display name and Material Symbol icon. Leave the icon text field empty to use the icon picked from the dropdown. Click **Save** to apply, or **Cancel** to discard changes.
+
+Click the reset icon to restore the widget's original detected name and default icon.
+
+#### Legacy variants
+
+Variants created before v4.0.0 stored only a `gpuIndex`. These are automatically adopted by PCI address the first time the matching GPU is detected. Legacy entries are labeled with `(legacy)` tag and can be safely removed.
 
 ### Update Interval (`updateInterval`)
 

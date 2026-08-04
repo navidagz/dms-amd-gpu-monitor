@@ -103,12 +103,30 @@ All popout styles (Default, Alternative, Legacy) read the same thresholds, so ch
 - Progress bars use `NumberAnimation` with `Easing.OutCubic` at 300 ms
 - Circle gauges use `Theme.mediumDuration`
 
+## Variant Detection and Matching
+
+When the settings UI loads, the plugin runs `amdgpu_top -J -n 1` once and shows a loading spinner while detection is in progress. Detected GPUs are sorted by PCI address and stored as widget variants.
+
+| Variant field | Source / purpose |
+|---|---|
+| `gpuPci` | PCI address from `amdgpu_top`; used as the stable identity for matching |
+| `originalName` | The detected GPU name; used by the reset action |
+| `name` / `icon` | User-editable display name and Material Symbol icon |
+| `gpuType` | `APU`, `dGPU`, or empty for suspended devices that do not report a type |
+| `description` | Human-readable description shown in **Add Widget** |
+
+### Matching rules
+
+- A variant with a matching `gpuPci` is reused; its `name` and `icon` are preserved unless the user resets them.
+- Suspended GPUs report an empty `type`; the plugin keeps the previously stored `gpuType` instead of clearing it.
+- Legacy variants that have `gpuIndex` are adopted by position the first time the matching GPU is detected, then matched by PCI on subsequent loads. They are labeled as `legacy` and can be removed in favour of auto-detected ones.
+
 ## Plugin Manifest (`plugin.json`)
 
 | Key | Value |
 |---|---|
 | `id` | `amdGpuMonitor` |
-| `version` | `3.1.0` |
+| `version` | `4.0.0` |
 | `capabilities` | `dankbar-widget`, `monitoring` |
 | `permissions` | `settings_read`, `settings_write`, `process` |
 | `requires` | `amdgpu_top` |

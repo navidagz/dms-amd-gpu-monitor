@@ -2,6 +2,28 @@
 
 All notable changes to this project are documented in this file.
 
+## [4.0.0]
+
+### Added
+- **GPU auto-detection**: GPUs are discovered automatically via `amdgpu_top -J -n 1` and matched by PCI address. Each detected GPU gets its own widget variant automatically.
+- **Inline variant editing**: Click the pencil icon on any configured widget to edit its display name and Material Symbol icon; use the reset button to restore the original detected name and icon.
+- **Loading indicator**: "Detecting GPUs..." spinner shown in settings while GPUs are being discovered.
+- `screenshots/settings.png` and `docs/images/settings.png` showing the new auto-detection and editing UI.
+
+### Changed
+- Multi-GPU workflow is now PCI-based instead of manual GPU index entry. Variants store `gpuPci` instead of `gpuIndex` for stable matching across reboots and hardware changes.
+- README and docs updated to describe the new auto-detection and inline editing flow.
+
+### Fixed
+- Variant `name` and `icon` are now preserved across GPU resyncs instead of being reset to detected defaults.
+- Legacy `gpuIndex`-only variants are automatically adopted and migrated to PCI-based variants.
+- Variant sync no longer skips legacy variants when a widget already covers the GPU.
+- Variant removal is restored and works correctly.
+
+### Removed
+- Manual **Create GPU Variant** form requiring a GPU index; variants are now created automatically from detected GPUs.
+- `screenshots/gpu-variant.png` (replaced by `settings.png`).
+
 ## [3.1.0]
 
 ### Added
