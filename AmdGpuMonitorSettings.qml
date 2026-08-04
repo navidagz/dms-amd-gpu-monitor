@@ -12,6 +12,7 @@ PluginSettings {
     // [{ name, pci, type, suspended }] as reported by amdgpu_top
     property var detectedGpus: []
     property string detectError: ""
+    property bool detecting: true
 
     function variantDescription(gpu) {
         const kind = gpu.type === "APU" ? "Integrated" : gpu.type === "dGPU" ? "Discrete" : "";
@@ -92,6 +93,7 @@ PluginSettings {
         onExited: exitCode => {
             if (exitCode !== 0)
                 root.detectError = "Could not run amdgpu_top. Is it installed?";
+            root.detecting = false;
         }
 
         stdout: StdioCollector {
@@ -101,6 +103,7 @@ PluginSettings {
                     data = JSON.parse(text.trim());
                 } catch (e) {
                     root.detectError = "Could not parse amdgpu_top output.";
+                    root.detecting = false;
                     return;
                 }
 
@@ -124,6 +127,7 @@ PluginSettings {
                 all.sort((a, b) => a.pci.localeCompare(b.pci));
                 root.detectedGpus = all;
                 root.detectError = all.length ? "" : "No AMD GPUs detected.";
+                root.detecting = false;
             }
         }
     }
@@ -210,12 +214,50 @@ PluginSettings {
 
     Rectangle {
         width: parent.width
-        height: gpuListColumn.implicitHeight + Theme.spacingM * 2
+        height: Math.max(resultsColumn.implicitHeight + Theme.spacingM * 2,
+                         root.detecting ? 56 : 0)
         radius: Theme.cornerRadius
         color: Theme.surfaceContainerHigh
 
+        Row {
+            id: detectingRow
+            visible: root.detecting && root.detectedGpus.length === 0
+            anchors.centerIn: parent
+            spacing: Theme.spacingM
+
+            Item {
+                width: 20
+                height: 20
+                anchors.verticalCenter: parent.verticalCenter
+
+                DankIcon {
+                    id: detectSpinner
+                    name: "progress_activity"
+                    size: 20
+                    color: Theme.surfaceVariantText
+                    anchors.centerIn: parent
+                }
+
+                NumberAnimation on rotation {
+                    from: 0
+                    to: 360
+                    duration: 1000
+                    loops: Animation.Infinite
+                    running: root.detecting && root.detectedGpus.length === 0
+                }
+            }
+
+            StyledText {
+                text: "Detecting GPUs..."
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.surfaceVariantText
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
         Column {
-            id: gpuListColumn
+            id: resultsColumn
+            visible: !detectingRow.visible
             anchors.fill: parent
             anchors.margins: Theme.spacingM
             spacing: Theme.spacingS
