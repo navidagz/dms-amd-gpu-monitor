@@ -95,26 +95,25 @@ You can switch styles at runtime from the DMS plugin settings UI.
 
 ### Multi-GPU Variants
 
-<img src="https://github.com/user-attachments/assets/acf694fb-e2a4-4622-9fa6-b29f462da538" align="right" width="400">
+<img src="screenshots/settings.png" align="right" width="400">
 
-This plugin now supports per-GPU widget variants through the DMS variant system.
+GPUs are auto-detected via PCI address — no manual index entry needed. Each detected GPU gets its own widget variant automatically.
 
 Use this when you want:
 
 - one bar widget for your discrete GPU
 - another bar widget for your integrated GPU
-- separate widgets for GPU 0, GPU 1, and beyond
+- separate widgets for each GPU in a multi-GPU system
 
-To create a GPU-specific widget:
+To add a GPU widget to your bar:
 
 1. Open DMS Settings -> Plugins -> AMD GPU Monitor
-2. Scroll to **GPU Variants**
-3. Enter a variant name such as `GPU 0` or `iGPU`
-4. Enter the zero-based GPU index
-5. Click **Create GPU Variant**
-6. Go to **Add Widget** and add the newly created variant
+2. Scroll to **Configured Widgets** — each detected GPU already has a variant
+3. Go to **Add Widget** and pick the variant you want
 
-Each created variant stores its own `gpuIndex`, so multiple AMD GPU Monitor widgets can show different GPUs at the same time.
+You can also **edit** a variant's display name and icon inline: click the edit (pencil) button, change the name and Material Symbol icon, then save. Use the reset button to restore the original detected name and icon.
+
+Legacy variants from older plugin versions appear with a `(legacy)` tag and can be safely removed.
 
 <br clear="right"/>
 
@@ -128,12 +127,11 @@ Available in the DMS settings UI:
 | `Popout Style` | Switches between `Default`, `Alternative`, and `Legacy`. |
 | `Update Interval` | Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU. |
 | `Process List Height` | Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range. |
-| `GPU Variants` | Creates and manages GPU-specific widget variants for multi-GPU systems. |
+| `GPU Variants` | Lists auto-detected GPUs and lets you edit widget display names and icons inline. |
 
 ## Notes
 
-- The base plugin can still be added directly and defaults to GPU index `0`.
-- For multi-GPU systems, prefer creating named variants instead of reusing the base widget.
+- Each variant stores its GPU by PCI address, so the correct GPU is always targeted even after hardware changes.
 - Temperature data is read from `amdgpu_top` first, with fallback handling for GPUs that expose temperature via different sensor fields or sysfs.
 - When a sysfs fallback is needed, the plugin resolves the GPU path from device metadata and reads the first `hwmon/*/temp1_input` entry via a direct `find` invocation without shell interpolation.
 

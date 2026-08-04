@@ -14,6 +14,11 @@ PluginComponent {
     property string variantId: ""
     property var variantData: null
 
+    onPluginDataChanged: {
+        if (root.variantId && Array.isArray(pluginData?.variants) && pluginData.variants.length)
+            root.variantData = pluginData.variants.find(v => v.id === root.variantId) || root.variantData;
+    }
+
     property real gpuUsage: 0.0
     property real vramUsed: 0.0
     property real vramTotal: 0.0
@@ -57,6 +62,8 @@ PluginComponent {
     // gpuIndex is kept only as a fallback for variants created before this.
     property string gpuPci: (variantData?.gpuPci ?? "").toString()
     property string popoutStyle: variantData?.popoutStyle ?? pluginData.popoutStyle ?? "default"
+    readonly property string widgetIcon: (variantData?.icon && String(variantData.icon)) ? variantData.icon : "memory"
+    readonly property string displayName: (variantData?.name && String(variantData.name)) ? variantData.name : root.gpuName
     property int processListHeight: Math.max(100, Math.min(750, parseInt(variantData?.processListHeight ?? pluginData.processListHeight ?? "250") || 250))
     readonly property string popoutStyleSource: {
         switch (popoutStyle) {
@@ -352,7 +359,7 @@ PluginComponent {
             spacing: Theme.spacingS
 
             DankIcon {
-                name: "shadow"
+                name: root.widgetIcon
                 size: root.iconSize
                 color: root.statsError ? Theme.error : Theme.widgetIconColor
                 opacity: root.gpuSuspended ? 0.5 : 1.0
@@ -406,7 +413,7 @@ PluginComponent {
             spacing: 1
 
             DankIcon {
-                name: "shadow"
+                name: root.widgetIcon
                 size: root.iconSize
                 color: root.statsError ? Theme.error : Theme.widgetIconColor
                 opacity: root.gpuSuspended ? 0.5 : 1.0
@@ -425,8 +432,8 @@ PluginComponent {
     popoutContent: Component {
         PopoutComponent {
             id: popout
-            headerText: root.gpuName
             showCloseButton: true
+            headerText: root.displayName
 
             Loader {
                 id: popoutLoader
