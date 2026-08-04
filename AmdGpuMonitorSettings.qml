@@ -312,7 +312,7 @@ PluginSettings {
             spacing: Theme.spacingS
 
             Repeater {
-                model: root.variants || []
+                model: root.variantsModel
 
                 Rectangle {
                     id: variantEntry
@@ -321,20 +321,64 @@ PluginSettings {
 
                     readonly property bool legacy: !variantEntry.modelData.gpuPci || variantEntry.modelData.gpuIndex !== undefined
 
+                    property bool editing: false
+                    property string pendingIcon: ""       // text-field value, empty = use picker
+                    property string pickerIcon: "memory"   // last dropdown selection
+
+                    function beginEdit() {
+                        const current = variantEntry.modelData.icon || "memory";
+                        nameEditField.text = variantEntry.modelData.name || "";
+                        variantEntry.pendingIcon = current;
+                        variantEntry.pickerIcon = current;
+                        iconTextField.text = current;
+                        variantEntry.editing = true;
+                        nameEditField.forceActiveFocus();
+                    }
+
+                    function commitEdit() {
+                        const variant = variantEntry.modelData;
+                        const newName = nameEditField.text.trim() || variant.name || "AMD GPU";
+                        // Text field wins if non-empty; otherwise the dropdown.
+                        const newIcon = variantEntry.pendingIcon || variantEntry.pickerIcon || "memory";
+                        root.updateVariant(variant.id, { name: newName, icon: newIcon });
+                        variantEntry.editing = false;
+                        ToastService.showInfo(`Updated widget: ${newName}`);
+                    }
+
+                    function resetEdit() {
+                        const variant = variantEntry.modelData;
+                        const originalName = variant.originalName || "AMD GPU";
+                        root.updateVariant(variant.id, { name: originalName, icon: "memory" });
+                        ToastService.showInfo(`Reset widget: ${originalName}`);
+                    }
+
                     width: parent.width
-                    height: variantRow.implicitHeight + Theme.spacingM * 2
+                    height: editing ? editorColumn.implicitHeight + Theme.spacingM * 2
+                                    : displayRow.implicitHeight + Theme.spacingM * 2
                     radius: Theme.cornerRadius
                     color: Theme.surfaceContainer
 
                     Row {
-                        anchors.fill: parent
+                        id: displayRow
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
                         anchors.leftMargin: Theme.spacingM
                         anchors.rightMargin: Theme.spacingS
                         spacing: Theme.spacingS
+                        visible: !variantEntry.editing
+
+                        DankIcon {
+                            id: variantIcon
+                            name: variantEntry.modelData.icon || "memory"
+                            size: 20
+                            color: Theme.surfaceVariantText
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
 
                         Column {
                             id: variantRow
-                            width: parent.width - deleteVariantButton.width - Theme.spacingS
+                            width: parent.width - variantIcon.width - editVariantButton.width - deleteVariantButton.width - (resetVariantButton.visible ? resetVariantButton.width + Theme.spacingS : 0) - Theme.spacingS * 3
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: Theme.spacingXS
 
@@ -357,6 +401,55 @@ PluginSettings {
                                 font.pixelSize: Theme.fontSizeSmall - 1
                                 color: variantEntry.legacy ? Theme.warning : Theme.surfaceVariantText
                                 elide: Text.ElideRight
+                            }
+                        }
+
+                        Rectangle {
+                            id: editVariantButton
+                            width: 28
+                            height: 28
+                            radius: 14
+                            color: editVariantArea.containsMouse ? Theme.outline : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: "edit"
+                                size: 16
+                                color: editVariantArea.containsMouse ? Theme.surfaceText : Theme.surfaceVariantText
+                            }
+
+                            MouseArea {
+                                id: editVariantArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: variantEntry.beginEdit()
+                            }
+                        }
+
+                        Rectangle {
+                            id: resetVariantButton
+                            width: 28
+                            height: 28
+                            radius: 14
+                            color: resetVariantArea.containsMouse ? Theme.outline : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: variantEntry.modelData.name !== variantEntry.modelData.originalName
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: "restart_alt"
+                                size: 16
+                                color: resetVariantArea.containsMouse ? Theme.surfaceText : Theme.surfaceVariantText
+                            }
+
+                            MouseArea {
+                                id: resetVariantArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: variantEntry.resetEdit()
                             }
                         }
 
@@ -385,6 +478,120 @@ PluginSettings {
                                     root.removeVariant(variant.id);
                                     ToastService.showInfo(`Removed widget: ${variant.name || variant.id}`);
                                 }
+                            }
+                        }
+                    }
+
+                    Column {
+                        id: editorColumn
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.leftMargin: Theme.spacingM
+                        anchors.rightMargin: Theme.spacingS
+                        visible: variantEntry.editing
+                        spacing: Theme.spacingS
+
+                        DankTextField {
+                            id: nameEditField
+                            width: parent.width
+                            placeholderText: "Widget name"
+                            maximumLength: 40
+                            onAccepted: variantEntry.commitEdit()
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: Theme.spacingS
+
+                            DankIcon {
+                                name: variantEntry.pendingIcon || variantEntry.pickerIcon || "memory"
+                                size: 20
+                                color: Theme.surfaceText
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            StyledText {
+                                width: parent.width - 20 - Theme.spacingS
+                                text: "Icon: pick from the dropdown or type a Material Symbol name. Leave the field empty to use the dropdown selection."
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.surfaceVariantText
+                                wrapMode: Text.WordWrap
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: Theme.spacingS
+
+                            DankTextField {
+                                id: iconTextField
+                                width: Math.max(120, parent.width - iconPicker.width - Theme.spacingS)
+                                height: iconPicker.height
+                                placeholderText: "e.g. shadow"
+                                maximumLength: 60
+                                anchors.verticalCenter: parent.verticalCenter
+                                onTextEdited: {
+                                    // Empty text = defer to the dropdown.
+                                    variantEntry.pendingIcon = text.trim();
+                                }
+                                onAccepted: variantEntry.commitEdit()
+                            }
+
+                            DankIconPicker {
+                                id: iconPicker
+                                width: 200
+                                height: 36
+                                currentIcon: variantEntry.pickerIcon
+                                anchors.verticalCenter: parent.verticalCenter
+                                onIconSelected: (iconName, iconType) => {
+                                    variantEntry.pickerIcon = iconName;
+                                    // If the text field is empty, the dropdown
+                                    // selection is the effective icon.
+                                    if (!iconTextField.text.trim())
+                                        variantEntry.pendingIcon = iconName;
+                                }
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: Theme.spacingXS
+
+                            DankIcon {
+                                name: "open_in_new"
+                                size: Theme.fontSizeSmall
+                                color: Theme.primary
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            StyledText {
+                                text: "Browse all Material Symbols"
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.primary
+                                linkColor: Theme.primary
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: Qt.openUrlExternally("https://fonts.google.com/icons?icon.set=Material+Symbols")
+                                }
+                            }
+                        }
+
+                        Row {
+                            spacing: Theme.spacingS
+
+                            DankButton {
+                                text: "Save"
+                                iconName: "save"
+                                onClicked: variantEntry.commitEdit()
+                            }
+
+                            DankButton {
+                                text: "Cancel"
+                                onClicked: variantEntry.editing = false
                             }
                         }
                     }
