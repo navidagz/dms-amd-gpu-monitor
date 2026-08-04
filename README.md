@@ -152,7 +152,7 @@ MIT License — Copyright 2026 Navid A.
 
 Built for [DankMaterialShell](https://github.com/DankMaterialShell) • Uses [amdgpu_top](https://github.com/Umio-Yasuno/amdgpu_top)
 
-Special thanks to [@skrimix](https://github.com/skrimix) and [@Tz-slayer](https://github.com/Tz-slayer) for contributions and feedback.
+Special thanks to [@skrimix](https://github.com/skrimix), [@Tz-slayer](https://github.com/Tz-slayer), and [@felipeadeildo](https://github.com/felipeadeildo) for contributions and feedback.
 
 <a href="https://github.com/navidagz/dms-amd-gpu-monitor/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=navidagz/dms-amd-gpu-monitor" />
