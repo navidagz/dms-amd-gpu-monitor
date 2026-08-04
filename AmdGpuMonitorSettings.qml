@@ -311,7 +311,7 @@ PluginSettings {
 
                     required property var modelData
 
-                    readonly property bool legacy: !variantEntry.modelData.gpuPci && variantEntry.modelData.gpuIndex !== undefined
+                    readonly property bool legacy: !variantEntry.modelData.gpuPci || variantEntry.modelData.gpuIndex !== undefined
 
                     width: parent.width
                     height: variantRow.implicitHeight + Theme.spacingM * 2
