@@ -53,18 +53,26 @@ PluginSettings {
             // Never clear a remembered type with the empty one a suspended
             // device reports.
             const gpuType = gpu.type || existing?.gpuType || "";
-            const name = adopted.indexOf(gpu.pci) !== -1 ? existing.name : gpu.name;
+            // Custom = the user changed the name away from the detected one
+            // (stored in originalName). Reset restores from originalName.
+            const custom = !!(existing?.name && existing.originalName && existing.name !== existing.originalName);
+            const keepName = custom || adopted.indexOf(gpu.pci) !== -1;
+            const name = existing && keepName ? existing.name : gpu.name;
+            const icon = existing?.icon ? existing.icon : "memory";
             const config = {
                 gpuPci: gpu.pci,
                 gpuType: gpuType,
-                description: variantDescription({ name: gpu.name, type: gpuType }),
-                icon: "memory"
+                originalName: gpu.name,
+                description: variantDescription({ name: name, type: gpuType }),
+                icon: icon
             };
             if (!existing) {
                 createVariant(gpu.name, config);
             } else if (existing.name !== name
                        || existing.description !== config.description
-                       || existing.gpuType !== gpuType) {
+                       || existing.gpuType !== gpuType
+                       || existing.icon !== config.icon
+                       || existing.originalName !== config.originalName) {
                 updateVariant(existing.id, Object.assign({ name: name }, config));
             }
         }
