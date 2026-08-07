@@ -58,7 +58,7 @@ Enable **Force Padding** in the plugin settings. This pads the widget to a fixed
 
 ### High CPU usage from the plugin
 
-Increase the **Update Interval** setting in the plugin settings UI to reduce polling frequency. The default is 4s; setting it to 8s or 15s will cut overhead significantly.
+The plugin shares one `amdgpu_top` poll across all widgets and screens, so CPU usage stays low even with multiple GPU widgets. If overhead is still noticeable, increase the **Update Interval** setting in the plugin settings UI to reduce polling frequency. The default is 4s; setting it to 8s or 15s will cut overhead further.
 
 ### Widget icon turns red / stats stop updating
 

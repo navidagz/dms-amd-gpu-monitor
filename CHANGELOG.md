@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [4.1.0]
+
+### Added
+- **Shared GPU stats service** (`AmdGpuService.qml`): a singleton that polls `amdgpu_top` once per update cycle and feeds every widget and the settings UI.
+- GPU detection in the settings UI now works even when no AMD GPU Monitor widget has been added to the bar.
+
+### Changed
+- Widgets subscribe to `AmdGpuService` instead of running their own `amdgpu_top` process.
+- The fastest update interval requested by any active widget drives the shared poll timer, so a widget set to 1s still updates every second.
+- `statsError` is now a shared state surfaced by the service; all widgets reflect the same error condition.
+
+### Performance
+- Reduced `amdgpu_top` invocations from one per widget per screen to one per tick. On multi-monitor setups with multiple GPU widgets this cuts CPU and IO overhead significantly.
+
+### Fixed
+- Eliminated per-widget `Process` instances that could become stale on GPU suspend/reset.
+
 ## [4.0.0]
 
 ### Added

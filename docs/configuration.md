@@ -75,6 +75,8 @@ Variants created before v4.0.0 stored only a `gpuIndex`. These are automatically
 
 Controls how often `amdgpu_top` is polled. Lower values are more responsive but use more CPU; higher values reduce polling overhead.
 
+All widgets share a single poll timer via `AmdGpuService`, and the fastest interval requested by any active widget drives that timer. For example, if one widget is set to 1s and another to 4s, both update every 1s.
+
 ---
 
 ## Advanced Configuration

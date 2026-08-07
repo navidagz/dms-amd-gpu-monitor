@@ -9,10 +9,12 @@ title: Technical Details
 
 The plugin uses `amdgpu_top` with JSON output mode to gather GPU statistics:
 
-1. A `Timer` fires every `updateInterval` ms (default: 4000 ms, configurable in settings as 1s–15s)
-2. It launches `Process { command: ["amdgpu_top", "-J", "-n", "1"] }`, guarded so a new poll never starts while the previous one is still running
-3. A `StdioCollector` captures stdout; when the stream finishes the JSON is parsed inside a `try`/`catch`. Parse failures, non-zero exit codes, and stderr output all set a `statsError` flag (shown as a red-tinted bar icon) without resetting existing values
-4. State properties are updated and the UI re-renders reactively via QML bindings; the process list is only reassigned when its contents actually changed, avoiding needless list-view churn
+1. A single `AmdGpuService` singleton polls `amdgpu_top` once per update cycle.
+2. Each widget and the settings UI subscribe to the service with `request(widget, interval)` and release it on destruction.
+3. The shared `Timer` runs only while subscribers exist and uses the shortest requested interval, so the fastest widget sets the pace (default: 4000 ms, configurable per widget as 1s–15s).
+4. A `Process { command: ["amdgpu_top", "-J", "-n", "1"] }` is guarded so a new poll never starts while the previous one is still running.
+5. A `StdioCollector` captures stdout; when the stream finishes the JSON is parsed inside a `try`/`catch`. Parse failures, non-zero exit codes, and stderr output all set a shared `statsError` flag (shown as a red-tinted bar icon on every widget) without resetting existing values.
+6. State properties are updated and the UI re-renders reactively via QML bindings; the process list is only reassigned when its contents actually changed, avoiding needless list-view churn.
 
 ## Data Fields
 
@@ -126,7 +128,7 @@ When the settings UI loads, the plugin runs `amdgpu_top -J -n 1` once and shows 
 | Key | Value |
 |---|---|
 | `id` | `amdGpuMonitor` |
-| `version` | `4.0.0` |
+| `version` | `4.1.0` |
 | `capabilities` | `dankbar-widget`, `monitoring` |
 | `permissions` | `settings_read`, `settings_write`, `process` |
 | `requires` | `amdgpu_top` |

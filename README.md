@@ -25,6 +25,7 @@ Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRA
   - `Alternative` — stat cards and chips
   - `Legacy` — compact text and progress bars
 - Multi-GPU widget variants — create separate widgets for GPU 0, GPU 1, and so on
+- Efficient shared polling — one `amdgpu_top` call per tick for all widgets and screens
 - Configurable via DankMaterialShell settings UI — no manual file editing required
 
 ## Quick Start
@@ -97,7 +98,7 @@ You can switch styles at runtime from the DMS plugin settings UI.
 
 <img src="screenshots/settings.png" align="right" width="400">
 
-GPUs are auto-detected via PCI address — no manual index entry needed. Each detected GPU gets its own widget variant automatically.
+GPUs are auto-detected via PCI address — no manual index entry needed. Each detected GPU gets its own widget variant automatically. All widgets share a single `amdgpu_top` poll, so adding more GPUs or screens does not multiply CPU overhead.
 
 Use this when you want:
 
@@ -125,7 +126,7 @@ Available in the DMS settings UI:
 |---|---|
 | `Force Padding` | Keeps the horizontal bar width stable as values change. |
 | `Popout Style` | Switches between `Default`, `Alternative`, and `Legacy`. |
-| `Update Interval` | Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU. |
+| `Update Interval` | Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU. The fastest interval requested by any active widget drives the shared poll timer. |
 | `Process List Height` | Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range. |
 | `GPU Variants` | Lists auto-detected GPUs and lets you edit widget display names and icons inline. |
 
