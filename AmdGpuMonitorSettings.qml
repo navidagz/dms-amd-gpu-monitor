@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell.Io
 import qs.Common
 import qs.Modules.Plugins
 import qs.Services
@@ -81,54 +80,47 @@ PluginSettings {
 
     onDetectedGpusChanged: syncVariantsToGpus()
 
-    Component.onCompleted: {
-        detectGpusProcess.running = true;
+    function refreshDetectedGpus() {
+        const active = AmdGpuService.devices.map(d => ({
+            name: d["Info"]?.["DeviceName"] || "AMD GPU",
+            pci: d["Info"]?.["PCI"] || "",
+            type: d["Info"]?.["GPU Type"] || "",
+            suspended: false
+        }));
+        // Suspended devices serialize from DevicePath, which has no
+        // "GPU Type": reading it needs the device open. Resolved from
+        // the variant in syncVariantsToGpus instead.
+        const asleep = AmdGpuService.suspendedDevices.map(d => ({
+            name: d.DeviceName || "AMD GPU",
+            pci: d.pci || "",
+            type: "",
+            suspended: true
+        }));
+
+        const all = active.concat(asleep).filter(g => g.pci);
+        all.sort((a, b) => a.pci.localeCompare(b.pci));
+        root.detectedGpus = all;
+        root.detecting = false;
+        root.detectError = AmdGpuService.statsError
+            ? "Could not run amdgpu_top. Is it installed?"
+            : all.length ? "" : "No AMD GPUs detected.";
     }
 
-    Process {
-        id: detectGpusProcess
-        command: ["amdgpu_top", "-J", "-n", "1"]
-        running: false
+    // Detection has to work with no widget in the bar, so subscribe while open.
+    Component.onCompleted: {
+        AmdGpuService.request(root, 2000);
+        if (AmdGpuService.devices.length || AmdGpuService.suspendedDevices.length)
+            refreshDetectedGpus();
+    }
+    Component.onDestruction: AmdGpuService.release(root)
 
-        onExited: exitCode => {
-            if (exitCode !== 0)
-                root.detectError = "Could not run amdgpu_top. Is it installed?";
-            root.detecting = false;
+    Connections {
+        target: AmdGpuService
+        function onDevicesChanged() {
+            root.refreshDetectedGpus();
         }
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let data;
-                try {
-                    data = JSON.parse(text.trim());
-                } catch (e) {
-                    root.detectError = "Could not parse amdgpu_top output.";
-                    root.detecting = false;
-                    return;
-                }
-
-                const active = (data.devices || []).map(d => ({
-                    name: d["Info"]?.["DeviceName"] || "AMD GPU",
-                    pci: d["Info"]?.["PCI"] || "",
-                    type: d["Info"]?.["GPU Type"] || "",
-                    suspended: false
-                }));
-                // Suspended devices serialize from DevicePath, which has no
-                // "GPU Type": reading it needs the device open. Resolved from
-                // the variant in syncVariantsToGpus instead.
-                const asleep = (data.suspended_devices || []).map(d => ({
-                    name: d.DeviceName || "AMD GPU",
-                    pci: d.pci || "",
-                    type: "",
-                    suspended: true
-                }));
-
-                const all = active.concat(asleep).filter(g => g.pci);
-                all.sort((a, b) => a.pci.localeCompare(b.pci));
-                root.detectedGpus = all;
-                root.detectError = all.length ? "" : "No AMD GPUs detected.";
-                root.detecting = false;
-            }
+        function onStatsErrorChanged() {
+            root.refreshDetectedGpus();
         }
     }
 

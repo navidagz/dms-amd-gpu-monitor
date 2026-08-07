@@ -27,7 +27,7 @@ PluginComponent {
     property int powerUsage: 0
     property string gpuName: "AMD GPU"
     property var processes: []
-    property bool statsError: false
+    readonly property bool statsError: AmdGpuService.statsError
     property bool gpuSuspended: false
 
     property real gfxUsage: 0.0
@@ -80,15 +80,17 @@ PluginComponent {
         id: commonStyles
     }
 
-    Timer {
-        id: updateTimer
-        interval: root.updateInterval
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            if (!updateGpuStatsProcess.running)
-                updateGpuStatsProcess.running = true;
+    Component.onCompleted: AmdGpuService.request(root, root.updateInterval)
+    Component.onDestruction: AmdGpuService.release(root)
+
+    onUpdateIntervalChanged: AmdGpuService.request(root, root.updateInterval)
+
+    onGpuPciChanged: applyStats()
+
+    Connections {
+        target: AmdGpuService
+        function onDevicesChanged() {
+            root.applyStats();
         }
     }
 
@@ -127,122 +129,83 @@ PluginComponent {
         }
     }
 
-    Process {
-        id: updateGpuStatsProcess
-        command: ["amdgpu_top", "-J", "-n", "1"]
-        running: false
-
-        onExited: (exitCode, exitStatus) => {
-            if (exitCode !== 0) {
-                root.statsError = true;
-                console.warn(`amdGpuMonitor: amdgpu_top exited with code ${exitCode}`);
-            }
-        }
-
-        stderr: StdioCollector {
-            onStreamFinished: {
-                const errorText = text.trim();
-                if (errorText.length > 0) {
-                    root.statsError = true;
-                    console.warn(`amdGpuMonitor: ${errorText}`);
-                }
-            }
-        }
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const output = text.trim();
-                let data;
-                try {
-                    data = JSON.parse(output);
-                } catch (e) {
-                    root.statsError = true;
-                    console.warn(`amdGpuMonitor: failed to parse amdgpu_top output: ${e}`);
-                    return;
-                }
-
-                root.statsError = false;
-                const devices = Array.isArray(data.devices) ? data.devices : [];
-                const suspended = Array.isArray(data.suspended_devices) ? data.suspended_devices : [];
-
-                let selectedGpu = null;
-                if (root.gpuPci) {
-                    selectedGpu = devices.find(d => d["Info"]?.["PCI"] === root.gpuPci) || null;
-                    if (!selectedGpu) {
-                        // Configured GPU is powered down: report it idle rather than
-                        // silently falling through to whichever card is still awake.
-                        const naps = suspended.find(d => d.pci === root.gpuPci);
-                        if (naps) {
-                            root.resetStats();
-                            root.gpuName = naps.DeviceName || "AMD GPU";
-                            root.gpuSuspended = true;
-                            return;
-                        }
-                    }
-                } else {
-                    selectedGpu = devices[root.gpuIndex] || devices[0];
-                }
-                root.gpuSuspended = false;
-
-                if (!selectedGpu) {
+    function applyStats() {
+        let selectedGpu = null;
+        if (root.gpuPci) {
+            selectedGpu = AmdGpuService.deviceByPci(root.gpuPci);
+            if (!selectedGpu) {
+                // Configured GPU is powered down: report it idle rather than
+                // silently falling through to whichever card is still awake.
+                const naps = AmdGpuService.suspendedByPci(root.gpuPci);
+                if (naps) {
                     root.resetStats();
-                    root.gpuName = "AMD GPU";
+                    root.gpuName = naps.DeviceName || "AMD GPU";
+                    root.gpuSuspended = true;
                     return;
                 }
-
-                root.gpuName = selectedGpu["Info"]?.["DeviceName"] || `AMD GPU ${root.gpuIndex}`;
-
-                root.gfxUsage = parseFloat(selectedGpu.gpu_activity?.["GFX"]?.value) || 0.0;
-                root.memUsage = parseFloat(selectedGpu.gpu_activity?.["Memory"]?.value) || 0.0;
-                root.mediaUsage = parseFloat(selectedGpu.gpu_activity?.["MediaEngine"]?.value) || 0.0;
-                root.gpuUsage = Math.max(root.gfxUsage, root.memUsage, root.mediaUsage);
-
-                root.vramUsed = parseFloat(selectedGpu["VRAM"]?.["Total VRAM Usage"]?.value) || 0.0;
-                root.vramTotal = parseFloat(selectedGpu["VRAM"]?.["Total VRAM"]?.value) || 0.0;
-                root.vramPercent = root.vramTotal > 0
-                    ? (root.vramUsed / root.vramTotal * 100) : 0.0;
-                const extractedTemperature = root.extractTemperature(selectedGpu);
-                if (extractedTemperature > 0) {
-                    root.temperature = extractedTemperature;
-                    root.temperatureSysfsPath = "";
-                } else if (!root.refreshTemperatureFromSysfs(selectedGpu)) {
-                    root.temperature = 0;
-                }
-                root.powerUsage = parseInt(selectedGpu.Sensors?.["Average Power"]?.value) || 0;
-
-                if (selectedGpu.fdinfo) {
-                    const processList = [];
-
-                    Object.keys(selectedGpu.fdinfo).forEach(pid => {
-                        const procInfo = selectedGpu.fdinfo[pid];
-                        const usage = procInfo.usage?.usage;
-                        if (!usage) return;
-
-                        const vram = usage.VRAM?.value || 0;
-                        const gfx = usage.GFX?.value || 0;
-                        const cpu = usage.CPU?.value || 0;
-
-                        if (vram > 0 || gfx > 0) {
-                            processList.push({
-                                name: procInfo.name || "Unknown",
-                                pid: parseInt(pid),
-                                vram: vram,
-                                vramUnit: usage.VRAM?.unit || "MiB",
-                                gfx: gfx,
-                                cpu: cpu,
-                                gtt: usage.GTT?.value || 0,
-                                compute: usage.Compute?.value || 0
-                            });
-                        }
-                    });
-
-                    processList.sort((a, b) => b.vram - a.vram);
-                    if (!root.processListsEqual(root.processes, processList))
-                        root.processes = processList;
-                } else if (root.processes.length > 0) {
-                    root.processes = [];
-                }
             }
+        } else {
+            selectedGpu = AmdGpuService.deviceByIndex(root.gpuIndex);
+        }
+        root.gpuSuspended = false;
+
+        if (!selectedGpu) {
+            root.resetStats();
+            root.gpuName = "AMD GPU";
+            return;
+        }
+
+        root.gpuName = selectedGpu["Info"]?.["DeviceName"] || `AMD GPU ${root.gpuIndex}`;
+
+        root.gfxUsage = parseFloat(selectedGpu.gpu_activity?.["GFX"]?.value) || 0.0;
+        root.memUsage = parseFloat(selectedGpu.gpu_activity?.["Memory"]?.value) || 0.0;
+        root.mediaUsage = parseFloat(selectedGpu.gpu_activity?.["MediaEngine"]?.value) || 0.0;
+        root.gpuUsage = Math.max(root.gfxUsage, root.memUsage, root.mediaUsage);
+
+        root.vramUsed = parseFloat(selectedGpu["VRAM"]?.["Total VRAM Usage"]?.value) || 0.0;
+        root.vramTotal = parseFloat(selectedGpu["VRAM"]?.["Total VRAM"]?.value) || 0.0;
+        root.vramPercent = root.vramTotal > 0
+            ? (root.vramUsed / root.vramTotal * 100) : 0.0;
+        const extractedTemperature = root.extractTemperature(selectedGpu);
+        if (extractedTemperature > 0) {
+            root.temperature = extractedTemperature;
+            root.temperatureSysfsPath = "";
+        } else if (!root.refreshTemperatureFromSysfs(selectedGpu)) {
+            root.temperature = 0;
+        }
+        root.powerUsage = parseInt(selectedGpu.Sensors?.["Average Power"]?.value) || 0;
+
+        if (selectedGpu.fdinfo) {
+            const processList = [];
+
+            Object.keys(selectedGpu.fdinfo).forEach(pid => {
+                const procInfo = selectedGpu.fdinfo[pid];
+                const usage = procInfo.usage?.usage;
+                if (!usage) return;
+
+                const vram = usage.VRAM?.value || 0;
+                const gfx = usage.GFX?.value || 0;
+                const cpu = usage.CPU?.value || 0;
+
+                if (vram > 0 || gfx > 0) {
+                    processList.push({
+                        name: procInfo.name || "Unknown",
+                        pid: parseInt(pid),
+                        vram: vram,
+                        vramUnit: usage.VRAM?.unit || "MiB",
+                        gfx: gfx,
+                        cpu: cpu,
+                        gtt: usage.GTT?.value || 0,
+                        compute: usage.Compute?.value || 0
+                    });
+                }
+            });
+
+            processList.sort((a, b) => b.vram - a.vram);
+            if (!root.processListsEqual(root.processes, processList))
+                root.processes = processList;
+        } else if (root.processes.length > 0) {
+            root.processes = [];
         }
     }
 
