@@ -101,9 +101,9 @@ PluginSettings {
         all.sort((a, b) => a.pci.localeCompare(b.pci));
         root.detectedGpus = all;
         root.detecting = false;
-        root.detectError = AmdGpuService.statsError
-            ? "Could not run amdgpu_top. Is it installed?"
-            : all.length ? "" : "No AMD GPUs detected.";
+		root.detectError = AmdGpuService.statsError && !all.length
+		    ? "Could not run amdgpu_top. Is it installed?"
+		    : all.length ? "" : "No AMD GPUs detected.";
     }
 
     // Detection has to work with no widget in the bar, so subscribe while open.
