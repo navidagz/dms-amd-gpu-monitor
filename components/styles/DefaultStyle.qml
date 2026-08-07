@@ -223,6 +223,7 @@ Column {
                         height: parent.height
 
                         Row {
+                            width: parent.width
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: Theme.spacingS
@@ -236,16 +237,18 @@ Column {
                             }
 
                             Column {
+                                width: parent.width - (Theme.iconSize - 4) - Theme.spacingS
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 2
 
                                 StyledText {
+                                    id: nameLabel
+                                    width: parent.width
                                     text: modelData.name
                                     font.pixelSize: Theme.fontSizeSmall
                                     font.weight: Font.Medium
                                     color: Theme.surfaceText
                                     elide: Text.ElideRight
-                                    width: Math.min(implicitWidth, 120)
                                 }
 
                                 StyledText {
