@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 
 import qs.Common
 import qs.Services
@@ -229,6 +230,16 @@ Column {
                 radius: 8
                 color: Theme.surfaceContainerHigh
 
+                ToolTip.text: modelData.name
+                ToolTip.visible: procMouseArea.containsMouse && nameLabel.implicitWidth > nameLabel.width
+                ToolTip.delay: 400
+
+                MouseArea {
+                    id: procMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                }
+
                 Row {
                     anchors.fill: parent
                     anchors.leftMargin: Theme.spacingM
@@ -254,6 +265,7 @@ Column {
                             spacing: 2
 
                             StyledText {
+                                id: nameLabel
                                 width: parent.width
                                 text: modelData.name
                                 color: Theme.surfaceText

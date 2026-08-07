@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 
 import qs.Common
 import qs.Services
@@ -200,6 +201,10 @@ Column {
                     ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12)
                     : "transparent"
                 border.width: 1
+
+                ToolTip.text: modelData.name
+                ToolTip.visible: procMouseArea.containsMouse && nameLabel.implicitWidth > nameLabel.width
+                ToolTip.delay: 400
 
                 MouseArea {
                     id: procMouseArea
