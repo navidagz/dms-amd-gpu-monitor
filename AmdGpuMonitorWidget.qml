@@ -65,6 +65,7 @@ PluginComponent {
     readonly property string widgetIcon: (variantData?.icon && String(variantData.icon)) ? variantData.icon : "memory"
     readonly property string displayName: (variantData?.name && String(variantData.name)) ? variantData.name : root.gpuName
     property int processListHeight: Math.max(100, Math.min(750, parseInt(variantData?.processListHeight ?? pluginData.processListHeight ?? "250") || 250))
+    property string processSort: (variantData?.processSort ?? pluginData.processSort ?? "vram").toString()
     readonly property string popoutStyleSource: {
         switch (popoutStyle) {
             case "alt":
@@ -90,6 +91,7 @@ PluginComponent {
     onUpdateIntervalChanged: AmdGpuService.request(root, root.updateInterval)
 
     onGpuPciChanged: applyStats()
+    onProcessSortChanged: applyStats()
 
     Connections {
         target: AmdGpuService
@@ -202,7 +204,7 @@ PluginComponent {
                 }
             });
 
-            processList.sort((a, b) => b.vram - a.vram);
+            processList.sort(root.compareProcesses);
             if (!root.processListsEqual(root.processes, processList))
                 root.processes = processList;
         } else if (root.processes.length > 0) {
@@ -214,6 +216,22 @@ PluginComponent {
         if (a.length !== b.length)
             return false;
         return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function compareProcesses(a, b) {
+        switch (root.processSort) {
+            case "gfx":
+                return b.gfx - a.gfx;
+            case "cpu":
+                return b.cpu - a.cpu;
+            case "name":
+                return (a.name || "").localeCompare(b.name || "");
+            case "pid":
+                return a.pid - b.pid;
+            case "vram":
+            default:
+                return b.vram - a.vram;
+        }
     }
 
     function formatVram() {

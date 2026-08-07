@@ -170,6 +170,52 @@ Column {
             }
         }
 
+        Row {
+            width: parent.width - Theme.spacingM * 2
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: Theme.spacingS
+
+            StyledText {
+                width: parent.width - procHeaderBadges.width - Theme.spacingS
+                text: "Process"
+                font.pixelSize: Theme.fontSizeSmall - 2
+                font.weight: Font.Medium
+                color: Theme.surfaceVariantText
+            }
+
+            Row {
+                id: procHeaderBadges
+                spacing: Theme.spacingXS
+
+                StyledText {
+                    width: 70
+                    text: "VRAM"
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Theme.fontSizeSmall - 2
+                    font.weight: Font.Medium
+                    color: Theme.surfaceVariantText
+                }
+
+                StyledText {
+                    width: 52
+                    text: "GFX"
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Theme.fontSizeSmall - 2
+                    font.weight: Font.Medium
+                    color: Theme.surfaceVariantText
+                }
+
+                StyledText {
+                    width: 52
+                    text: "CPU"
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Theme.fontSizeSmall - 2
+                    font.weight: Font.Medium
+                    color: Theme.surfaceVariantText
+                }
+            }
+        }
+
         DankListView {
             width: parent.width
             height: Math.min(contentHeight, root.processListHeight)

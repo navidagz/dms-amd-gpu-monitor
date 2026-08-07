@@ -165,6 +165,20 @@ PluginSettings {
         defaultValue: "250"
     }
 
+    SelectionSetting {
+        settingKey: "processSort"
+        label: "Process List Sort"
+        description: "Sort order for the GPU process list"
+        options: [
+            { label: "VRAM Usage", value: "vram" },
+            { label: "GPU Usage (GFX)", value: "gfx" },
+            { label: "CPU Usage", value: "cpu" },
+            { label: "Process Name", value: "name" },
+            { label: "PID", value: "pid" }
+        ]
+        defaultValue: "vram"
+    }
+
     Rectangle {
         width: parent.width
         height: 1
