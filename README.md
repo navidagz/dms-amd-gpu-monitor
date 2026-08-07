@@ -24,6 +24,8 @@ Real-time AMD GPU monitoring plugin for DankMaterialShell. Tracks GPU usage, VRA
   - `Default` — circular gauges
   - `Alternative` — stat cards and chips
   - `Legacy` — compact text and progress bars
+- Configurable process list sorting (VRAM, GFX, CPU, Name, PID)
+- Hover tooltips show the full name when a process label is truncated
 - Multi-GPU widget variants — create separate widgets for GPU 0, GPU 1, and so on
 - Efficient shared polling — one `amdgpu_top` call per tick for all widgets and screens
 - Configurable via DankMaterialShell settings UI — no manual file editing required
@@ -122,13 +124,14 @@ Legacy variants from older plugin versions appear with a `(legacy)` tag and can 
 
 Available in the DMS settings UI:
 
-| Setting | Description |
-|---|---|
-| `Force Padding` | Keeps the horizontal bar width stable as values change. |
-| `Popout Style` | Switches between `Default`, `Alternative`, and `Legacy`. |
-| `Update Interval` | Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU. The fastest interval requested by any active widget drives the shared poll timer. |
-| `Process List Height` | Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range. |
-| `GPU Variants` | Lists auto-detected GPUs and lets you edit widget display names and icons inline. |
+|| Setting | Description |
+|---|---|---|
+|| `Force Padding` | Keeps the horizontal bar width stable as values change. |
+|| `Popout Style` | Switches between `Default`, `Alternative`, and `Legacy`. |
+|| `Update Interval` | Controls how often `amdgpu_top` is polled (1s–15s). Lower values are more responsive but use more CPU. The fastest interval requested by any active widget drives the shared poll timer. |
+|| `Process List Height` | Controls the maximum process list height in the popout. The widget clamps the effective value to its supported range. |
+|| `Process List Sort` | Sorts the popout process list by VRAM Usage, GPU Usage (GFX), CPU Usage, Process Name, or PID. |
+|| `GPU Variants` | Lists auto-detected GPUs and lets you edit widget display names and icons inline. |
 
 ## Notes
 
@@ -158,4 +161,3 @@ Special thanks to [@skrimix](https://github.com/skrimix), [@Tz-slayer](https://g
 <a href="https://github.com/navidagz/dms-amd-gpu-monitor/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=navidagz/dms-amd-gpu-monitor" />
 </a>
-

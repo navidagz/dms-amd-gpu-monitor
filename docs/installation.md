@@ -16,6 +16,7 @@ title: Installation Guide
 ## Installing amdgpu_top
 
 ### Arch Linux / AUR
+
 ```bash
 yay -S amdgpu_top
 ```

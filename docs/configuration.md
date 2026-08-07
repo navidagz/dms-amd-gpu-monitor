@@ -43,6 +43,16 @@ Controls the visual style of the popout panel when you click the bar widget.
 
 Sets the maximum height of the GPU process list in the popout panel.
 
+### Process List Sort (`processSort`)
+
+| | |
+|---|---|
+| **Type** | Selection |
+| **Default** | `VRAM Usage` |
+| **Options** | VRAM Usage, GPU Usage (GFX), CPU Usage, Process Name, PID |
+
+Controls how the GPU process list is ordered in the popout panel. The list re-sorts immediately when the setting is changed.
+
 ### GPU Variants
 
 Below the settings above, the plugin settings UI has a **Your GPUs** / **Configured Widgets** section for multi-GPU systems.

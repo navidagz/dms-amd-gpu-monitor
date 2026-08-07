@@ -8,6 +8,7 @@ title: Troubleshooting
 ## Plugin not showing data
 
 ### Check if amdgpu_top is installed
+
 ```bash
 which amdgpu_top
 amdgpu_top -J -n 1
@@ -16,11 +17,13 @@ amdgpu_top -J -n 1
 The second command should produce valid JSON output. If it errors or hangs, the plugin will not work.
 
 ### Verify GPU is detected
+
 ```bash
 ls /sys/class/drm/card*/device/vendor
 ```
 
 ### Check amdgpu driver is loaded
+
 ```bash
 lsmod | grep amdgpu
 ```

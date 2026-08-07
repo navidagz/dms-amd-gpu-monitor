@@ -3,7 +3,7 @@
   "name": "AMD GPU Monitor",
   "description": "Monitor AMD GPU usage, VRAM, temperature, power consumption and process usage.",
   "category": "monitoring",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "author": "Navid A.",
   "type": "widget",
   "capabilities": [

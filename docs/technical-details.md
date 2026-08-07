@@ -52,7 +52,7 @@ Display auto-scales: if total < 1024 MiB, values are shown in MiB; otherwise the
 
 ### Per-Process Metrics (fdinfo)
 
-Only processes where `vram > 0 || gfx > 0` are included. The list is sorted by VRAM descending.
+Only processes where `vram > 0 || gfx > 0` are included. The list is sorted by the selected **Process List Sort** setting; the default is VRAM descending.
 
 | Field | Source key | Description |
 |---|---|---|
@@ -128,7 +128,7 @@ When the settings UI loads, the plugin runs `amdgpu_top -J -n 1` once and shows 
 | Key | Value |
 |---|---|
 | `id` | `amdGpuMonitor` |
-| `version` | `4.1.0` |
+| `version` | `4.2.0` |
 | `capabilities` | `dankbar-widget`, `monitoring` |
 | `permissions` | `settings_read`, `settings_write`, `process` |
 | `requires` | `amdgpu_top` |
