@@ -29,7 +29,7 @@ PluginSettings {
 
         const claimed = (variants || []).map(v => v.gpuPci).filter(pci => pci);
         for (const variant of legacy) {
-            const gpu = detectedGpus[variant.gpuIndex];
+            const gpu = AmdGpuService.deviceByIndex(variant.gpuIndex);
             if (!gpu || !gpu.pci || claimed.indexOf(gpu.pci) !== -1)
                 continue;
             claimed.push(gpu.pci);
@@ -81,35 +81,19 @@ PluginSettings {
     onDetectedGpusChanged: syncVariantsToGpus()
 
     function refreshDetectedGpus() {
-        const active = AmdGpuService.devices.map(d => ({
-            name: d["Info"]?.["DeviceName"] || "AMD GPU",
-            pci: d["Info"]?.["PCI"] || "",
-            type: d["Info"]?.["GPU Type"] || "",
-            suspended: false
-        }));
-        // Suspended devices serialize from DevicePath, which has no
-        // "GPU Type": reading it needs the device open. Resolved from
-        // the variant in syncVariantsToGpus instead.
-        const asleep = AmdGpuService.suspendedDevices.map(d => ({
-            name: d.DeviceName || "AMD GPU",
-            pci: d.pci || "",
-            type: "",
-            suspended: true
-        }));
-
-        const all = active.concat(asleep).filter(g => g.pci);
+        const all = AmdGpuService.devices.slice();
         all.sort((a, b) => a.pci.localeCompare(b.pci));
         root.detectedGpus = all;
         root.detecting = false;
-		root.detectError = AmdGpuService.statsError && !all.length
-		    ? "Could not run amdgpu_top. Is it installed?"
-		    : all.length ? "" : "No AMD GPUs detected.";
+        root.detectError = AmdGpuService.statsError && !all.length
+            ? "Could not run amdgpu_top. Is it installed?"
+            : all.length ? "" : "No AMD GPUs detected.";
     }
 
     // Detection has to work with no widget in the bar, so subscribe while open.
     Component.onCompleted: {
         AmdGpuService.request(root, 2000);
-        if (AmdGpuService.devices.length || AmdGpuService.suspendedDevices.length)
+        if (AmdGpuService.devices.length)
             refreshDetectedGpus();
     }
     Component.onDestruction: AmdGpuService.release(root)

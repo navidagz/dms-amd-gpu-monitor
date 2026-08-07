@@ -12,8 +12,9 @@ Singleton {
 
     readonly property int defaultInterval: 4000
 
+    // Every GPU amdgpu_top reported, each carrying name, pci and suspended.
+    // Suspended ones serialize from DevicePath and keep no stats.
     property var devices: []
-    property var suspendedDevices: []
     property bool statsError: false
 
     // Keyed by widget so the copies of a variant mirrored across screens hold a
@@ -43,16 +44,14 @@ Singleton {
     }
 
     function deviceByPci(pci) {
-        return pci ? devices.find(d => d["Info"]?.["PCI"] === pci) || null : null;
+        return pci ? devices.find(d => d.pci === pci) || null : null;
     }
 
-    function suspendedByPci(pci) {
-        return pci ? suspendedDevices.find(d => d.pci === pci) || null : null;
-    }
-
-    // Kept for variants created before GPUs were addressed by PCI.
+    // Kept for variants created before GPUs were addressed by PCI. Positions
+    // came from amdgpu_top's own order and only ever counted awake GPUs, so
+    // both the widget and the settings migration have to resolve them here.
     function deviceByIndex(index) {
-        return devices[index] || devices[0] || null;
+        return devices.filter(d => !d.suspended)[index] || null;
     }
 
     Timer {
@@ -101,8 +100,25 @@ Singleton {
                 }
 
                 root.statsError = false;
-                root.devices = Array.isArray(data.devices) ? data.devices : [];
-                root.suspendedDevices = Array.isArray(data.suspended_devices) ? data.suspended_devices : [];
+
+                const awake = (Array.isArray(data.devices) ? data.devices : []).map(d => ({
+                    name: d["Info"]?.["DeviceName"] || "AMD GPU",
+                    pci: d["Info"]?.["PCI"] || "",
+                    type: d["Info"]?.["GPU Type"] || "",
+                    suspended: false,
+                    stats: d
+                }));
+                const asleep = (Array.isArray(data.suspended_devices) ? data.suspended_devices : []).map(d => ({
+                    name: d.DeviceName || "AMD GPU",
+                    pci: d.pci || "",
+                    // "GPU Type" needs the device open, so a suspended one omits
+                    // it. Consumers fall back to what they already remember.
+                    type: "",
+                    suspended: true,
+                    stats: null
+                }));
+
+                root.devices = awake.concat(asleep).filter(d => d.pci);
             }
         }
     }

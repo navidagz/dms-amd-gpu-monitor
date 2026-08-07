@@ -80,7 +80,11 @@ PluginComponent {
         id: commonStyles
     }
 
-    Component.onCompleted: AmdGpuService.request(root, root.updateInterval)
+    Component.onCompleted: {
+        AmdGpuService.request(root, root.updateInterval);
+        if (AmdGpuService.devices.length)
+            applyStats();
+    }
     Component.onDestruction: AmdGpuService.release(root)
 
     onUpdateIntervalChanged: AmdGpuService.request(root, root.updateInterval)
@@ -130,32 +134,29 @@ PluginComponent {
     }
 
     function applyStats() {
-        let selectedGpu = null;
-        if (root.gpuPci) {
-            selectedGpu = AmdGpuService.deviceByPci(root.gpuPci);
-            if (!selectedGpu) {
-                // Configured GPU is powered down: report it idle rather than
-                // silently falling through to whichever card is still awake.
-                const naps = AmdGpuService.suspendedByPci(root.gpuPci);
-                if (naps) {
-                    root.resetStats();
-                    root.gpuName = naps.DeviceName || "AMD GPU";
-                    root.gpuSuspended = true;
-                    return;
-                }
-            }
-        } else {
-            selectedGpu = AmdGpuService.deviceByIndex(root.gpuIndex);
-        }
-        root.gpuSuspended = false;
+        const device = root.gpuPci
+            ? AmdGpuService.deviceByPci(root.gpuPci)
+            : AmdGpuService.deviceByIndex(root.gpuIndex) || AmdGpuService.deviceByIndex(0);
 
-        if (!selectedGpu) {
+        if (!device) {
+            root.gpuSuspended = false;
             root.resetStats();
             root.gpuName = "AMD GPU";
             return;
         }
 
-        root.gpuName = selectedGpu["Info"]?.["DeviceName"] || `AMD GPU ${root.gpuIndex}`;
+        // Powered down: report it idle rather than silently falling through to
+        // whichever card is still awake.
+        if (device.suspended) {
+            root.resetStats();
+            root.gpuName = device.name;
+            root.gpuSuspended = true;
+            return;
+        }
+        root.gpuSuspended = false;
+
+        const selectedGpu = device.stats;
+        root.gpuName = device.name;
 
         root.gfxUsage = parseFloat(selectedGpu.gpu_activity?.["GFX"]?.value) || 0.0;
         root.memUsage = parseFloat(selectedGpu.gpu_activity?.["Memory"]?.value) || 0.0;
