@@ -364,20 +364,20 @@ PluginComponent {
 
                 StyledTextMetrics {
                     id: textBaseline
-                    font.pixelSize: Theme.fontSizeSmall
+                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                     text: "88% | 8.8GiB"
                 }
 
                 StyledTextMetrics {
                     id: currentTextMetrics
-                    font.pixelSize: Theme.fontSizeSmall
+                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                     text: `${root.gpuUsage.toFixed(0)}% | ${(root.vramUsed / 1024).toFixed(1)}GiB`
                 }
 
                 StyledText {
                     id: gpuText
                     text: currentTextMetrics.text
-                    font.pixelSize: Theme.fontSizeSmall
+                    font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                     color: Theme.widgetTextColor
                     anchors.fill: parent
                     wrapMode: Text.NoWrap
@@ -404,7 +404,7 @@ PluginComponent {
 
             StyledText {
                 text: `${root.gpuUsage.toFixed(0)}%`
-                font.pixelSize: Theme.fontSizeSmall
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                 color: Theme.widgetTextColor
                 anchors.horizontalCenter: parent.horizontalCenter
             }
