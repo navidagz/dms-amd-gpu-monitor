@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [4.2.1]
+
+### Fixed
+
+- Bar text now scales with `barTextSize` (following bar thickness, font scale, and widget-text settings) instead of the fixed small font size, matching the behavior of other DankBar widgets.
+
 ## [4.2.0]
 
 ### Added
