@@ -252,7 +252,7 @@ Column {
                         spacing: Theme.spacingS
 
                         DankIcon {
-                            name: DgopService.getProcessIcon(modelData.name || "")
+                            name: commonStyles.processIcon(modelData.name)
                             size: Theme.iconSize - 4
                             color: Theme.surfaceText
                             opacity: 0.8
