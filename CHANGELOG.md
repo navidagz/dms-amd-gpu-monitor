@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [4.2.2]
+
+### Fixed
+
+- GPU process rows now use known Material Symbols for browsers, games, creative tools, editors, terminals, and compositors, with a generic process symbol for unknown names.
+
 ## [4.2.1]
 
 ### Fixed
