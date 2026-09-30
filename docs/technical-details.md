@@ -64,6 +64,8 @@ Only processes where `vram > 0 || gfx > 0` are included. The list is sorted by t
 
 Requires Linux kernel 5.14+ and AMDGPU driver with fdinfo support.
 
+Process icons are Material Symbols selected by `components/shared/ProcessIcons.js`. Known browsers, games, creative tools, editors, terminals, and compositors use category symbols; terminal names use substring matching so variants such as `kitty-wayland` resolve to `terminal`. Unmatched process names use the generic `deployed_code` symbol.
+
 ## Color Coding
 
 Usage and temperature thresholds are centralized in `components/shared/CommonStyles.qml` and shared by all three popout styles:
@@ -98,7 +100,7 @@ All popout styles (Default, Alternative, Legacy) read the same thresholds, so ch
 | `components/shared/EngineBar.qml` | Label + animated horizontal bar + percentage; used for GFX/Memory/Media rows |
 | `components/shared/ProgressBar.qml` | Generic animated fill bar; configurable height, radius, colors |
 | `components/shared/StatCard.qml` | Rounded card with icon, label, large bold value, and a thin progress bar |
-| `components/shared/CommonStyles.qml` | Shared layout constants (`largePanelRadius: 16`, `mediumPanelRadius: 12`, `chipHeight: 48`, etc.) plus the shared usage/temperature color thresholds and `usageColor()`/`temperatureColor()` helpers |
+| `components/shared/CommonStyles.qml` | Shared layout constants (`largePanelRadius`/`mediumPanelRadius`/`smallBadgeRadius` derived from `Theme.cornerRadius`/`Theme.cornerRadiusSmall`, `chipHeight: 48`, etc.) plus the shared usage/temperature color thresholds and `usageColor()`/`temperatureColor()` helpers |
 
 ## Animations
 
