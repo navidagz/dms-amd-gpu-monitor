@@ -5,7 +5,7 @@ title: Documentation
 
 # AMD GPU Monitor Documentation
 
-Welcome to the AMD GPU Monitor documentation. This plugin (v4.2.0) provides real-time monitoring of AMD GPU statistics for DankMaterialShell.
+Welcome to the AMD GPU Monitor documentation. This plugin (v4.3.0) provides real-time monitoring of AMD GPU statistics for DankMaterialShell.
 
 ## Quick Navigation
 

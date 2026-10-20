@@ -4,6 +4,7 @@ import Quickshell.Io
 
 import qs.Common
 import qs.Widgets
+import qs.DCommon.Widgets
 import qs.Modules.Plugins
 
 import "components/shared" as Shared
@@ -340,7 +341,7 @@ PluginComponent {
         Row {
             spacing: Theme.spacingS
 
-            DankIcon {
+            DIcon {
                 name: root.widgetIcon
                 size: root.iconSize
                 color: root.statsError ? Theme.error : Theme.widgetIconColor
@@ -394,7 +395,7 @@ PluginComponent {
         Column {
             spacing: 1
 
-            DankIcon {
+            DIcon {
                 name: root.widgetIcon
                 size: root.iconSize
                 color: root.statsError ? Theme.error : Theme.widgetIconColor

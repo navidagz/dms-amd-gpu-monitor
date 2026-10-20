@@ -1,7 +1,7 @@
 import QtQuick
 
 import qs.Common
-import qs.Widgets
+import qs.DCommon.Widgets
 
 Rectangle {
     id: statCardRoot
@@ -25,7 +25,7 @@ Rectangle {
         Row {
             spacing: Theme.spacingS
 
-            DankIcon {
+            DIcon {
                 name: statCardRoot.iconName
                 size: 20
                 color: statCardRoot.iconColor

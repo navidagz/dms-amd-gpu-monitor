@@ -3,6 +3,7 @@ import qs.Common
 import qs.Modules.Plugins
 import qs.Services
 import qs.Widgets
+import qs.DCommon.Widgets
 
 PluginSettings {
     id: root
@@ -220,7 +221,7 @@ PluginSettings {
                 height: 20
                 anchors.verticalCenter: parent.verticalCenter
 
-                DankIcon {
+                DIcon {
                     id: detectSpinner
                     name: "progress_activity"
                     size: 20
@@ -269,7 +270,7 @@ PluginSettings {
                         anchors.rightMargin: Theme.spacingM
                         spacing: Theme.spacingM
 
-                        DankIcon {
+                        DIcon {
                             id: gpuIcon
                             name: "memory"
                             size: 20
@@ -400,7 +401,7 @@ PluginSettings {
                         spacing: Theme.spacingS
                         visible: !variantEntry.editing
 
-                        DankIcon {
+                        DIcon {
                             id: variantIcon
                             name: variantEntry.modelData.icon || "memory"
                             size: 20
@@ -444,7 +445,7 @@ PluginSettings {
                             color: editVariantArea.containsMouse ? Theme.outline : "transparent"
                             anchors.verticalCenter: parent.verticalCenter
 
-                            DankIcon {
+                            DIcon {
                                 anchors.centerIn: parent
                                 name: "edit"
                                 size: 16
@@ -469,7 +470,7 @@ PluginSettings {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: variantEntry.modelData.name !== variantEntry.modelData.originalName
 
-                            DankIcon {
+                            DIcon {
                                 anchors.centerIn: parent
                                 name: "restart_alt"
                                 size: 16
@@ -493,7 +494,7 @@ PluginSettings {
                             color: deleteVariantArea.containsMouse ? Theme.error : "transparent"
                             anchors.verticalCenter: parent.verticalCenter
 
-                            DankIcon {
+                            DIcon {
                                 anchors.centerIn: parent
                                 name: "delete"
                                 size: 16
@@ -524,7 +525,7 @@ PluginSettings {
                         visible: variantEntry.editing
                         spacing: Theme.spacingS
 
-                        DankTextField {
+                        DTextField {
                             id: nameEditField
                             width: parent.width
                             placeholderText: "Widget name"
@@ -536,7 +537,7 @@ PluginSettings {
                             width: parent.width
                             spacing: Theme.spacingS
 
-                            DankIcon {
+                            DIcon {
                                 name: variantEntry.pendingIcon || variantEntry.pickerIcon || "memory"
                                 size: 20
                                 color: Theme.surfaceText
@@ -557,7 +558,7 @@ PluginSettings {
                             width: parent.width
                             spacing: Theme.spacingS
 
-                            DankTextField {
+                            DTextField {
                                 id: iconTextField
                                 width: Math.max(120, parent.width - iconPicker.width - Theme.spacingS)
                                 height: iconPicker.height
@@ -591,7 +592,7 @@ PluginSettings {
                             width: parent.width
                             spacing: Theme.spacingXS
 
-                            DankIcon {
+                            DIcon {
                                 name: "open_in_new"
                                 size: Theme.fontSizeSmall
                                 color: Theme.primary
@@ -615,13 +616,13 @@ PluginSettings {
                         Row {
                             spacing: Theme.spacingS
 
-                            DankButton {
+                            DButton {
                                 text: "Save"
                                 iconName: "save"
                                 onClicked: variantEntry.commitEdit()
                             }
 
-                            DankButton {
+                            DButton {
                                 text: "Cancel"
                                 onClicked: variantEntry.editing = false
                             }
