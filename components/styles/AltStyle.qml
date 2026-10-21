@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 import qs.Common
 import qs.Services
-import qs.Widgets
+import qs.DCommon.Widgets
 
 import "../shared" as Shared
 
@@ -57,7 +57,7 @@ Column {
                 anchors.centerIn: parent
                 spacing: Theme.spacingS
 
-                DankIcon {
+                DIcon {
                     name: "thermostat"
                     size: 22
                     color: root.temperature > commonStyles.temperatureCriticalThreshold ? Theme.error : Theme.secondary
@@ -85,7 +85,7 @@ Column {
                 anchors.centerIn: parent
                 spacing: Theme.spacingS
 
-                DankIcon {
+                DIcon {
                     name: "bolt"
                     size: 22
                     color: Theme.secondary
@@ -155,7 +155,7 @@ Column {
         Row {
             spacing: Theme.spacingS
 
-            DankIcon {
+            DIcon {
                 name: "apps"
                 size: 18
                 color: Theme.surfaceVariantText
@@ -217,7 +217,7 @@ Column {
             }
         }
 
-        DankListView {
+        DListView {
             width: parent.width
             height: Math.min(contentHeight, root.processListHeight)
             model: root.processes
@@ -251,7 +251,7 @@ Column {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: Theme.spacingS
 
-                        DankIcon {
+                        DIcon {
                             name: commonStyles.processIcon(modelData.name)
                             size: Theme.iconSize - 4
                             color: Theme.surfaceText
@@ -297,7 +297,7 @@ Column {
                                 anchors.centerIn: parent
                                 spacing: 4
 
-                                DankIcon {
+                                DIcon {
                                     name: "memory"
                                     size: 14
                                     color: Theme.primary
@@ -325,7 +325,7 @@ Column {
                                 anchors.centerIn: parent
                                 spacing: 4
 
-                                DankIcon {
+                                DIcon {
                                     name: "speed"
                                     size: 14
                                     color: Theme.surfaceText
@@ -353,7 +353,7 @@ Column {
                                 anchors.centerIn: parent
                                 spacing: 4
 
-                                DankIcon {
+                                DIcon {
                                     name: "developer_board"
                                     size: 14
                                     color: Theme.surfaceText

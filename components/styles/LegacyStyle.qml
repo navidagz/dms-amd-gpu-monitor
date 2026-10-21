@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 import qs.Common
 import qs.Services
-import qs.Widgets
+import qs.DCommon.Widgets
 
 import "../shared" as Shared
 
@@ -166,7 +166,7 @@ Column {
             font.bold: true
         }
 
-        DankListView {
+        DListView {
             width: parent.width
             height: Math.min(contentHeight, root.processListHeight)
             model: root.processes
@@ -199,7 +199,7 @@ Column {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: Theme.spacingS
 
-                        DankIcon {
+                        DIcon {
                             name: commonStyles.processIcon(modelData.name)
                             size: Theme.iconSize - 4
                             color: Theme.surfaceText

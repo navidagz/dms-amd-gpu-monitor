@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 import qs.Common
 import qs.Services
-import qs.Widgets
+import qs.DCommon.Widgets
 
 import "../shared" as Shared
 
@@ -79,7 +79,7 @@ Column {
             Row {
                 spacing: Theme.spacingS
 
-                DankIcon {
+                DIcon {
                     name: "speed"
                     size: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
@@ -126,7 +126,7 @@ Column {
         Row {
             spacing: Theme.spacingS
 
-            DankIcon {
+            DIcon {
                 name: "apps"
                 size: Theme.fontSizeSmall
                 color: Theme.surfaceVariantText
@@ -183,7 +183,7 @@ Column {
             }
         }
 
-        DankListView {
+        DListView {
             width: parent.width
             height: Math.min(contentHeight, root.processListHeight)
             model: root.processes
@@ -228,7 +228,7 @@ Column {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: Theme.spacingS
 
-                            DankIcon {
+                            DIcon {
                                 name: commonStyles.processIcon(modelData.name)
                                 size: Theme.iconSize - 4
                                 color: Theme.surfaceText
@@ -272,7 +272,7 @@ Column {
                             anchors.centerIn: parent
                             spacing: 4
 
-                            DankIcon {
+                            DIcon {
                                 name: "memory"
                                 size: 12
                                 color: Theme.primary
@@ -303,7 +303,7 @@ Column {
                             anchors.centerIn: parent
                             spacing: 4
 
-                            DankIcon {
+                            DIcon {
                                 name: "speed"
                                 size: 12
                                 color: modelData.gfx > 50 ? Theme.warning : Theme.surfaceText
@@ -332,7 +332,7 @@ Column {
                             anchors.centerIn: parent
                             spacing: 4
 
-                            DankIcon {
+                            DIcon {
                                 name: "developer_board"
                                 size: 12
                                 color: Theme.surfaceVariantText

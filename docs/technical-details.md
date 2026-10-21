@@ -130,7 +130,7 @@ When the settings UI loads, the plugin runs `amdgpu_top -J -n 1` once and shows 
 | Key | Value |
 |---|---|
 | `id` | `amdGpuMonitor` |
-| `version` | `4.2.0` |
+| `version` | `4.3.0` |
 | `capabilities` | `dankbar-widget`, `monitoring` |
 | `permissions` | `settings_read`, `settings_write`, `process` |
 | `requires` | `amdgpu_top` |
