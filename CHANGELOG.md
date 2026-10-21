@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- Migrated from deprecated shell widget wrappers to `qs.DCommon.Widgets`: `DankIcon` → `DIcon`, `DankButton` → `DButton`, `DankTextField` → `DTextField`, `DankListView` → `DListView`.
+- Migrated from deprecated shell widget wrappers to `qs.DCommon.Widgets`: `DankIcon` → `DIcon`, `DankButton` → `DButton`, `DankTextField` → `DTextField`, `DankListView` → `DListView`, `DankIconPicker` → `DIconPicker`.
 - See the [plugin author migration notice](https://duxlabs.dev/blog/v2-0-release#plugin-authors-update-your-widgets), the shared [`DCommon/Widgets` library](https://github.com/duxlabs-dev/dux-qml-common/tree/master/DCommon/Widgets), and the shell's [compatibility wrappers](https://github.com/duxlabs-dev/dux-shell/tree/master/quickshell/Widgets) for old-to-new names.
 
 ## [4.2.2]

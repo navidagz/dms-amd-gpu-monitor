@@ -572,7 +572,7 @@ PluginSettings {
                                 onAccepted: variantEntry.commitEdit()
                             }
 
-                            DankIconPicker {
+                            DIconPicker {
                                 id: iconPicker
                                 width: 200
                                 height: 36
